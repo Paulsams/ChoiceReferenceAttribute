@@ -41,6 +41,12 @@ IMPORTANT: in order for the lists/arrays to work, it is necessary to add [System
 
 ![image](https://github.com/Paulsams/ChoiceReferenceAttribute/blob/master/Documentation~/IgnoreNames.gif)
 
+4) ICanChangeSerializeReference - an interface that you can implement at the heir in order to make some kind of check that the Type change is valid at the moment.
+
+## Конструкторы:
+	ChoiceReferenceAttribute(bool nullable, params string[] ignoreNameProperties)
+	ChoiceReferenceAttribute(params string[] ignoreNameProperties) - where nullable = false
+
 ## Samples:
 To download the examples for this package:
 1) Select this package in PackageManager;

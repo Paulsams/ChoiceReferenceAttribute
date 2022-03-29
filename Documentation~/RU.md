@@ -23,6 +23,12 @@
 
 ![image](https://github.com/Paulsams/ChoiceReferenceAttribute/blob/master/Documentation~/IgnoreNames.gif)
 
+4) ICanChangeSerializeReference - интерфейс, который вы можете реализовать у наследника для того, чтобы сделать какую-то свою проверку, что валидна ли в данный момент смена типа.
+
+## Конструкторы:
+	ChoiceReferenceAttribute(bool nullable, params string[] ignoreNameProperties)
+	ChoiceReferenceAttribute(params string[] ignoreNameProperties) - где nullable = false
+
 ## Примеры:
 Чтобы скачать примеры к данному пакету:
 1) Выберите данный пакет в PackageManager;
