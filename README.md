@@ -19,7 +19,7 @@ IMPORTANT: in order for the lists/arrays to work, it is necessary to add [System
 [SerializeReference, ChoiceReference] private List<BaseClass> _listChoiceReferences;
 ```
 
-![image](https://github.com/Paulsams/ChoiceReferenceAttribute/blob/master/Documentation~/Simple%20and%20Lists.gif)
+![image](https://github.com/Paulsams/ChoiceReferenceAttribute/blob/master/Documentation~/Single%20and%20Lists.gif)
 
 2) You can specify the nullable flag in the parameters attribute, which allows you to remove the "null" state from the selection for the object. If it is "false" (and this is the default value), then you will still need to select the type for the first time, otherwise there would be recursion if there is a field with the same attribute in the object.
 
