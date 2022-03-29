@@ -45,11 +45,11 @@ public class ChoiceReferenceAttributeDrawer : PropertyDrawer
         public readonly ChoiceReferenceAttribute Attribute;
         public readonly int IndexNullVariable;
 
-        public DataReference(FieldInfo fieldInfo, ChoiceReferenceAttribute choiceReferenceAttribute)
+        public DataReference(Type fieldType, ChoiceReferenceAttribute choiceReferenceAttribute)
         {
             IgnoreNameProperties = choiceReferenceAttribute.IgnoreNameProperties;
 
-            Type typeProperty = fieldInfo.FieldType.IsArray ? fieldInfo.FieldType.GetElementType() : fieldInfo.FieldType;
+            Type typeProperty = ReflectionUtilities.GetArrayOrListElementTypeOrThisType(fieldType);
             Types = ReflectionUtilities.GetFinalAssignableTypesFromAllTypes(typeProperty);
             List<string> typesNames = Types.Select(type => type.Name).ToList();
 
@@ -141,7 +141,7 @@ public class ChoiceReferenceAttributeDrawer : PropertyDrawer
     {
         _isCalledOnGui = true;
 
-        if (property.hasMultipleDifferentValues == false)
+        //if (property.hasMultipleDifferentValues == false)
             DrawManagedReference(property, label.text, position);
     }
 
@@ -284,7 +284,7 @@ public class ChoiceReferenceAttributeDrawer : PropertyDrawer
     {
         if (_dataReferences.TryGetValue(fieldInfo, out DataReference data) == false)
         {
-            data = new DataReference(fieldInfo, attribute as ChoiceReferenceAttribute);
+            data = new DataReference(fieldInfo.FieldType, attribute as ChoiceReferenceAttribute);
             _dataReferences.Add(fieldInfo, data);
         }
         return data;

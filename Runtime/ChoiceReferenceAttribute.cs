@@ -9,9 +9,11 @@ public class ChoiceReferenceAttribute : PropertyAttribute
     public readonly bool Nullable;
     public readonly ReadOnlyCollection<string> IgnoreNameProperties;
 
-    public ChoiceReferenceAttribute(bool nullable = false, params string[] ignoreNameProperties)
+    public ChoiceReferenceAttribute(bool nullable, params string[] ignoreNameProperties)
     {
         Nullable = nullable;
         IgnoreNameProperties = System.Array.AsReadOnly(ignoreNameProperties);
     }
+
+    public ChoiceReferenceAttribute(params string[] ignoreNameProperties) : this(false, ignoreNameProperties) { }
 }
