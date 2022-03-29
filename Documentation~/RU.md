@@ -7,7 +7,7 @@
 2) Выберите "Add package from get URL";
 3) Вставьте ссылки на пакеты, которые являются зависимостями данного пакета:
     + `https://github.com/Paulsams/MiscUtilities.git`
-3) Вставьте ссылку на данный пакет: `https://github.com/Paulsams/ChoiceReferenceAttribute`
+3) Вставьте ссылку на данный пакет: `https://github.com/Paulsams/ChoiceReferenceAttribute.git`
 
 ## Возможности:
 1) Работает для листов/массивов и для любой вложенности данного атрибута.

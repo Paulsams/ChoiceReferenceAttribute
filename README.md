@@ -10,7 +10,7 @@ To add this package to the project, follow these steps:
 2) Select "Add package from get URL";
 3) Insert links to packages that are dependencies of this package:
     + `https://github.com/Paulsams/MiscUtilities.git`
-4) Insert this link `https://github.com/Paulsams/ChoiceReferenceAttribute`
+4) Insert this link `https://github.com/Paulsams/ChoiceReferenceAttribute.git`
 
 ## Opportunities:
 1) Works for lists/array and for any nesting of this attribute.
