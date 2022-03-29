@@ -43,7 +43,7 @@ IMPORTANT: in order for the lists/arrays to work, it is necessary to add [System
 
 4) ICanChangeSerializeReference - an interface that you can implement at the heir in order to make some kind of check that the Type change is valid at the moment.
 
-## Конструкторы:
+## Constructors:
 	ChoiceReferenceAttribute(bool nullable, params string[] ignoreNameProperties)
 	ChoiceReferenceAttribute(params string[] ignoreNameProperties) - where nullable = false
 
