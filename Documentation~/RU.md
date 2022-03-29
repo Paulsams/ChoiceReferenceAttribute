@@ -13,7 +13,7 @@
 1) Работает для листов/массивов и для любой вложенности данного атрибута.
 ВАЖНО: чтобы для листов/массивов работало, то нужно обязательно базовому классу дописать [System.Serializable]. Не спрашивайте меня почему - такова жизнь:
 
-![image](https://github.com/Paulsams/ChoiceReferenceAttribute/blob/master/Documentation~/Simple%20and%20Lists.gif)
+![image](https://github.com/Paulsams/ChoiceReferenceAttribute/blob/master/Documentation~/Single%20and%20Lists.gif)
 
 2) Можно в параметрах атрибута указать флаг nullable, который позволяет из выбора убрать задание объекту состояние "null". Если он будет "false" (а это есть значение по умолчанию), то Вам всё равно надо будет в первый раз выбрать тип, а иначе была бы рекурсия, если в объекте будет поле с этим же атрибутом.
 
