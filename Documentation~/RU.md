@@ -5,7 +5,9 @@
 Чтобы добавить данный пакет в проект, нужно выполнить следующие шаги:
 1) Откройте PackageManager;
 2) Выберите "Add package from get URL";
-3) Вставьте данную ссылку `https://github.com/Paulsams/ChoiceReferenceAttribute`
+3) Вставьте ссылки на пакеты, которые являются зависимостями данного пакета:
+    + `https://github.com/Paulsams/MiscUtilities.git`
+3) Вставьте ссылку на данный пакет: `https://github.com/Paulsams/ChoiceReferenceAttribute`
 
 ## Возможности:
 1) Работает для листов/массивов и для любой вложенности данного атрибута.

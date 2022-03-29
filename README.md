@@ -8,7 +8,9 @@ This package allows you to use the [ChoiceReference] attribute to make a popup i
 To add this package to the project, follow these steps:
 1) Open PackageManager;
 2) Select "Add package from get URL";
-3) Insert this link `https://github.com/Paulsams/ChoiceReferenceAttribute`
+3) Insert links to packages that are dependencies of this package:
+    + `https://github.com/Paulsams/MiscUtilities.git`
+4) Insert this link `https://github.com/Paulsams/ChoiceReferenceAttribute`
 
 ## Opportunities:
 1) Works for lists/array and for any nesting of this attribute.
