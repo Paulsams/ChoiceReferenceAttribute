@@ -14,7 +14,8 @@ To add this package to the project, follow these steps:
 
 ## Opportunities:
 1) Works for lists/array and for any nesting of this attribute.
-IMPORTANT: in order for the lists/arrays to work, it is necessary to add [System.Serializable] to the base class. Don't ask me why - that's life:
+
+IMPORTANT: In order for the attribute to work for lists/array, it is necessary to add `[System.Serializable]` to the base class. Don't ask me why - that's life:
 
 ```cs
 [SerializeReference, ChoiceReference] private BaseClass _singleChoiceReference;
@@ -44,8 +45,10 @@ IMPORTANT: in order for the lists/arrays to work, it is necessary to add [System
 4) ICanChangeSerializeReference - an interface that you can implement at the heir in order to make some kind of check that the Type change is valid at the moment.
 
 ## Constructors:
-	ChoiceReferenceAttribute(bool nullable, params string[] ignoreNameProperties)
-	ChoiceReferenceAttribute(params string[] ignoreNameProperties) - where nullable = false
+```cs
+ChoiceReferenceAttribute(bool nullable, params string[] ignoreNameProperties)
+ChoiceReferenceAttribute(params string[] ignoreNameProperties) - where nullable = false
+```
 
 ## Samples:
 To download the examples for this package:
