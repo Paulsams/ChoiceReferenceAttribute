@@ -244,14 +244,14 @@ public class ChoiceReferenceAttributeDrawer : PropertyDrawer
 
         newManagedReference = Activator.CreateInstance(parameters.Data.Types[indexChoiceType]);
 
-        var canChangeSerializeReference = newManagedReference as ICanChangeSerializeReference;
-        if (canChangeSerializeReference == null || canChangeSerializeReference.CanChangeSerializeReference())
+        var canChangeSerializeReference = newManagedReference as ISerializeReferenceChangeValidate;
+        if (canChangeSerializeReference == null || canChangeSerializeReference.Validate(out string textError))
         {
             ReflectionUtilities.CopyFieldsFromSourceToDestination(oldManagedReference, newManagedReference);
         }
         else
         {
-            Debug.LogError(canChangeSerializeReference.TextError);
+            EditorUtility.DisplayDialog($"Cannot be changed to {newManagedReference.GetType()}", textError, "Ok");
             changeReference = false;
         }
 

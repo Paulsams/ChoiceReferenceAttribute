@@ -3,7 +3,7 @@ This package allows you to use the [ChoiceReference] attribute to make a popup i
 
 [Документация на русском](https://github.com/Paulsams/ChoiceReferenceAttribute/blob/master/Documentation~/RU.md)
 
-## Add to project:
+## Add to project
 
 To add this package to the project, follow these steps:
 1) Open PackageManager;
@@ -12,7 +12,7 @@ To add this package to the project, follow these steps:
     + `https://github.com/Paulsams/MiscUtilities.git`
 4) Insert this link `https://github.com/Paulsams/ChoiceReferenceAttribute.git`
 
-## Opportunities:
+## Opportunities
 1) Works for lists/array and for any nesting of this attribute.
 
 IMPORTANT: In order for the attribute to work for lists/array, it is necessary to add `[System.Serializable]` to the base class. Don't ask me why - that's life:
@@ -42,15 +42,15 @@ IMPORTANT: In order for the attribute to work for lists/array, it is necessary t
 
 ![image](https://github.com/Paulsams/ChoiceReferenceAttribute/blob/master/Documentation~/IgnoreNames.gif)
 
-4) ICanChangeSerializeReference - an interface that you can implement at the heir in order to make some kind of check that the Type change is valid at the moment.
+4) ISerializeReferenceChangeValidate - an interface that you can implement at the heir in order to make some kind of check that the Type change is valid at the moment.
 
-## Constructors:
+## Constructors
 ```cs
 ChoiceReferenceAttribute(bool nullable, params string[] ignoreNameProperties)
 ChoiceReferenceAttribute(params string[] ignoreNameProperties) - where nullable = false
 ```
 
-## Samples:
+## Samples
 To download the examples for this package:
 1) Select this package in PackageManager;
 2) Expand the "Samples" tab on the right;

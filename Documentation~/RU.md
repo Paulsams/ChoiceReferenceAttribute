@@ -1,7 +1,7 @@
 # ChoiceReferenceAttribute
 Данный пакет позволяет вам использовать атрибут [ChoiceReference] для создания popup взаимодействия для выбора подкласса, от которого наследуется базовый класс, указанный вами в качестве типа поля. Списки и массивы также поддерживаются, как и тот факт, что этот атрибут будет снова использоваться в подклассах.
 
-## Добавление в проект:
+## Добавление в проект
 Чтобы добавить данный пакет в проект, нужно выполнить следующие шаги:
 1) Откройте PackageManager;
 2) Выберите "Add package from get URL";
@@ -9,7 +9,7 @@
     + `https://github.com/Paulsams/MiscUtilities.git`
 3) Вставьте ссылку на данный пакет: `https://github.com/Paulsams/ChoiceReferenceAttribute.git`
 
-## Возможности:
+## Возможности
 1) Работает для листов/массивов и для любой вложенности данного атрибута.
 
 ВАЖНО: чтобы атрибут работал с листами или массивами, то нужно обязательно базовому классу дописать `[System.Serializable]`. Не спрашивайте меня почему - такова жизнь:
@@ -39,15 +39,15 @@
 
 ![image](https://github.com/Paulsams/ChoiceReferenceAttribute/blob/master/Documentation~/IgnoreNames.gif)
 
-4) ICanChangeSerializeReference - интерфейс, который вы можете реализовать у наследника для того, чтобы сделать какую-то свою проверку, что валидна ли в данный момент смена типа.
+4) ISerializeReferenceChangeValidate - интерфейс, который вы можете реализовать у наследника для того, чтобы сделать какую-то свою проверку, что валидна ли в данный момент смена типа.
 
-## Конструкторы:
+## Конструкторы
 ```cs
 ChoiceReferenceAttribute(bool nullable, params string[] ignoreNameProperties)
 ChoiceReferenceAttribute(params string[] ignoreNameProperties) - где nullable = false
 ```
 
-## Примеры:
+## Примеры
 Чтобы скачать примеры к данному пакету:
 1) Выберите данный пакет в PackageManager;
 2) Раскройте справа вкладку "Samples";
