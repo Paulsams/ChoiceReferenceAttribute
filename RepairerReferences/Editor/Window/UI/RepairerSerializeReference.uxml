@@ -1,0 +1,57 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <ui:Template name="ChangerContainer" src="project://database/Packages/com.paulsams.choice-reference-attribute/RepairerReferences/Editor/Window/UI/Templates/ChangerContainer.uxml?fileID=9197481963319205126&amp;guid=a9290bcc1273e3b489f36d1ecb5198fb&amp;type=3#ChangerContainer" />
+    <ui:Template name="TwoValuesContainer" src="project://database/Packages/com.paulsams.choice-reference-attribute/RepairerReferences/Editor/Window/UI/Templates/TwoValuesContainer.uxml?fileID=9197481963319205126&amp;guid=55b4eb8feedea91479c1b75360424a8e&amp;type=3#TwoValuesContainer" />
+    <Style src="project://database/Packages/com.paulsams.choice-reference-attribute/RepairerReferences/Editor/Window/UI/RepairerSerializeReference.uss?fileID=7433441132597879392&amp;guid=256855f230963884dbb467227597b592&amp;type=3#RepairerSerializeReference" />
+    <uie:Toolbar name="MainToolbar">
+        <uie:ToolbarButton text="Update" display-tooltip-when-elided="true" name="Update" />
+    </uie:Toolbar>
+    <ui:Instance template="ChangerContainer" name="ChangerContainer" style="flex-shrink: 0;" />
+    <ui:VisualElement name="MainContentContainer" class="contentContainer border mainContentContainer" style="flex-grow: 1; padding-top: 3px; padding-left: 3px; padding-right: 3px; padding-bottom: 3px;">
+        <ui:VisualElement name="TypeInfoContainer">
+            <uie:Toolbar class="unity-base-field">
+                <ui:Label text="Property Name" display-tooltip-when-elided="true" class="unity-base-field__label" />
+                <ui:VisualElement class="containerTwoValues" style="padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0;">
+                    <ui:Label text="Old Value" display-tooltip-when-elided="true" class="oneValueFromManyValues" style="-unity-text-align: middle-center;" />
+                    <ui:Label text="New Value" display-tooltip-when-elided="true" class="oneValueFromManyValues" style="-unity-text-align: middle-center;" />
+                </ui:VisualElement>
+            </uie:Toolbar>
+            <ui:Instance template="TwoValuesContainer" name="AssemblyNameContainer">
+                <AttributeOverrides element-name="Label" text="Assembly Name" />
+            </ui:Instance>
+            <ui:Instance template="TwoValuesContainer" name="NamespaceNameContainer">
+                <AttributeOverrides element-name="Label" text="Namespace Name" />
+            </ui:Instance>
+            <ui:Instance template="TwoValuesContainer" name="ClassNameContainer">
+                <AttributeOverrides element-name="Label" text="Class Name" />
+            </ui:Instance>
+            <ui:VisualElement name="ChangeReferenceContainer" style="flex-direction: row-reverse; margin-top: 10px;">
+                <ui:Button text="Update" display-tooltip-when-elided="true" name="UpdateButton" />
+                <ui:Toggle text="Update All" name="UpdateAll" value="true" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="Separator" class="separator" />
+        <ui:VisualElement name="DataObjectContainer">
+            <ui:Instance template="ChangerContainer">
+                <ui:ScrollView scroll-deceleration-rate="0,135" elasticity="0,1" vertical-scroller-visibility="AlwaysVisible" name="ContentContainer">
+                    <ui:VisualElement name="MiscInfoContainer">
+                        <ui:Label text="Misc Info" display-tooltip-when-elided="true" class="headerInfoObject header" />
+                        <uie:LongField label="Reference Id" name="ReferenceId" readonly="true" />
+                        <ui:TextField picking-mode="Ignore" label="Serialized Data" readonly="true" name="SerializedData" multiline="true" style="height: auto; min-height: 100px;" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="SceneObjectContainer">
+                        <ui:Label text="Scene Object Info" display-tooltip-when-elided="true" class="headerInfoObject header" />
+                        <ui:VisualElement name="SceneInfoContainer" style="flex-direction: row;">
+                            <ui:TextField picking-mode="Ignore" label="Scene Name" name="SceneName" readonly="true" style="flex-grow: 1;" />
+                            <ui:Button text="Open" display-tooltip-when-elided="true" name="OpenScene" style="margin-left: 0; padding-top: 0; padding-bottom: 0;" />
+                        </ui:VisualElement>
+                        <uie:ObjectField label="Object" name="SceneObject" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="PrefabObjectContainer">
+                        <ui:Label text="Prefab Object Info" display-tooltip-when-elided="true" class="headerInfoObject header" />
+                        <uie:ObjectField label="Object Field" name="PrefabObject" />
+                    </ui:VisualElement>
+                </ui:ScrollView>
+            </ui:Instance>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

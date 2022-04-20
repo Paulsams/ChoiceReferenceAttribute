@@ -11,5 +11,5 @@ public struct Data
 
 public class ClassWithData : BaseClass
 {
-    [SerializeField] private Data _data;
+    [SerializeField, Ignore] private Data _data;
 }

@@ -1,0 +1,11 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Packages/com.paulsams.choice-reference-attribute/RepairerReferences/Editor/Window/UI/RepairerSerializeReference.uss?fileID=7433441132597879392&amp;guid=256855f230963884dbb467227597b592&amp;type=3#RepairerSerializeReference" />
+    <ui:VisualElement name="Container" class="unity-base-field">
+        <ui:Label text="Label" display-tooltip-when-elided="true" name="Label" class="unity-base-field__label" />
+        <ui:VisualElement name="Values" class="containerTwoValues" style="flex-direction: row;">
+            <ui:TextField picking-mode="Ignore" readonly="true" name="Old" class="oneValueFromManyValues" style="padding-right: 10px; margin-right: -9px;" />
+            <ui:Button display-tooltip-when-elided="true" name="Copy" text="➔" style="padding-left: 3px; padding-right: 3px;" />
+            <ui:TextField picking-mode="Ignore" name="New" class="oneValueFromManyValues" style="padding-left: 10px; margin-left: -9px;" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

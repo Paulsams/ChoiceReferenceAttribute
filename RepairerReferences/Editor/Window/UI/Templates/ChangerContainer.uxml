@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <uie:Toolbar name="ChangerContainer" style="height: 35px; justify-content: center;">
+        <ui:Button text="Last" display-tooltip-when-elided="true" name="Last" style="width: 50px;" />
+        <ui:Label text="4" display-tooltip-when-elided="true" name="CurrentIndex" style="-unity-text-align: middle-center; font-size: 24px; flex-grow: 1;" />
+        <ui:Button text="Next" display-tooltip-when-elided="true" name="Next" style="width: 50px;" />
+    </uie:Toolbar>
+</ui:UXML>
