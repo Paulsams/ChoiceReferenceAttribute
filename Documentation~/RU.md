@@ -9,6 +9,10 @@
     + `https://github.com/Paulsams/MiscUtilities.git`
 3) Вставьте ссылку на данный пакет: `https://github.com/Paulsams/ChoiceReferenceAttribute.git`
 
+## Зависимости
+- Использует:
+    + MicsUtilities: https://github.com/Paulsams/MiscUtilities.git
+
 ## Возможности
 1) Работает для листов/массивов и для любой вложенности данного атрибута.
 
@@ -30,21 +34,11 @@
 
 ![image](https://github.com/Paulsams/ChoiceReferenceAttribute/blob/master/Documentation~/Nullable.gif)
 
-3) Также можно в параметрах указать массив (params) игнорируемых полей и это полезно для тех случаев, когда вам нужно внутри объекта разделить данные по разным классам и чтобы не приходилось их каждый раз расскрывать через foldout, то можете заюзать данное игнорирование.
-
-```cs
-[SerializeReference, ChoiceReference("_data")] private BaseClass _singleChoiceReferenceWithIgnoreData;
-[SerializeReference, ChoiceReference] private BaseClass _singleChoiceReferenceNotIgnoreData;
-```
-
-![image](https://github.com/Paulsams/ChoiceReferenceAttribute/blob/master/Documentation~/IgnoreNames.gif)
-
-4) ISerializeReferenceChangeValidate - интерфейс, который вы можете реализовать у наследника для того, чтобы сделать какую-то свою проверку, что валидна ли в данный момент смена типа.
+3) ISerializeReferenceChangeValidate - интерфейс, который вы можете реализовать у наследника для того, чтобы сделать какую-то свою проверку, что валидна ли в данный момент смена типа.
 
 ## Конструкторы
 ```cs
-ChoiceReferenceAttribute(bool nullable, params string[] ignoreNameProperties)
-ChoiceReferenceAttribute(params string[] ignoreNameProperties) - где nullable = false
+ChoiceReferenceAttribute(bool nullable)
 ```
 
 ## Примеры

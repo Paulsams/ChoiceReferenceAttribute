@@ -4,13 +4,16 @@ This package allows you to use the [ChoiceReference] attribute to make a popup i
 [Документация на русском](https://github.com/Paulsams/ChoiceReferenceAttribute/blob/master/Documentation~/RU.md)
 
 ## Add to project
-
 To add this package to the project, follow these steps:
 1) Open PackageManager;
 2) Select "Add package from get URL";
 3) Insert links to packages that are dependencies of this package:
     + `https://github.com/Paulsams/MiscUtilities.git`
 4) Insert this link `https://github.com/Paulsams/ChoiceReferenceAttribute.git`
+
+## Dependencies
+- Is using:
+    + MicsUtilities: https://github.com/Paulsams/MiscUtilities.git
 
 ## Opportunities
 1) Works for lists/array and for any nesting of this attribute.
@@ -33,21 +36,11 @@ IMPORTANT: In order for the attribute to work for lists/array, it is necessary t
 
 ![image](https://github.com/Paulsams/ChoiceReferenceAttribute/blob/master/Documentation~/Nullable.gif)
 
-3) You can also specify an array (params) of ignored fields in the parameters, and this is useful for those cases when you need to divide data into different classes inside an object and so that you don't have to open them every time through foldout, then you can use this ignoring.
-
-```cs
-[SerializeReference, ChoiceReference("_data")] private BaseClass _singleChoiceReferenceWithIgnoreData;
-[SerializeReference, ChoiceReference] private BaseClass _singleChoiceReferenceNotIgnoreData;
-```
-
-![image](https://github.com/Paulsams/ChoiceReferenceAttribute/blob/master/Documentation~/IgnoreNames.gif)
-
-4) ISerializeReferenceChangeValidate - an interface that you can implement at the heir in order to make some kind of check that the Type change is valid at the moment.
+3) ISerializeReferenceChangeValidate - an interface that you can implement at the heir in order to make some kind of check that the Type change is valid at the moment.
 
 ## Constructors
 ```cs
-ChoiceReferenceAttribute(bool nullable, params string[] ignoreNameProperties)
-ChoiceReferenceAttribute(params string[] ignoreNameProperties) - where nullable = false
+ChoiceReferenceAttribute(bool nullable)
 ```
 
 ## Samples
