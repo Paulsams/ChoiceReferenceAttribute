@@ -9,7 +9,7 @@
     + `https://github.com/Paulsams/MiscUtilities.git`
 3) Вставьте ссылку на данный пакет: `https://github.com/Paulsams/ChoiceReferenceAttribute.git`
 
-## Связанные пакеты:
+## Связанные пакеты
 1) RepairerSerializeReferences (пока что только с 2021.2) - окно редактора, которое позволяет починить ссылки, которые полетели в связи со сменой названия класса, пространстрва имён или сборки: https://github.com/Paulsams/RepairerSerializeReferences
 
 ## Зависимости
