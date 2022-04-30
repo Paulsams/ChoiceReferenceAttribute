@@ -3,9 +3,6 @@ This package allows you to use the [ChoiceReference] attribute to make a popup i
 
 [Документация на русском](https://github.com/Paulsams/ChoiceReferenceAttribute/blob/master/Documentation~/RU.md)
 
-## Related Packages:
-1) RepairerSerializeReferences (so far only from 2021.2) - an editor window that allows you to fix links that flew due to a change in the name of the class, namespace, or assembly: https://github.com/Paulsams/RepairerSerializeReferences
-
 ## Add to project
 To add this package to the project, follow these steps:
 1) Open PackageManager;
@@ -13,6 +10,9 @@ To add this package to the project, follow these steps:
 3) Insert links to packages that are dependencies of this package:
     + `https://github.com/Paulsams/MiscUtilities.git`
 4) Insert this link `https://github.com/Paulsams/ChoiceReferenceAttribute.git`
+
+## Related Packages
+1) RepairerSerializeReferences (so far only from 2021.2) - an editor window that allows you to fix links that flew due to a change in the name of the class, namespace, or assembly: https://github.com/Paulsams/RepairerSerializeReferences
 
 ## Dependencies
 - Is using:
