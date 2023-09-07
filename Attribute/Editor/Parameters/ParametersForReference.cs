@@ -10,12 +10,11 @@ namespace ChoiceReferenceEditor
 
         public override object ManagedReferenceValue => _managedReferenceValue;
 
-        public override bool Foldout => _foldout;
+        public override bool IsHaveFoldout => _foldout;
 
-        public bool _foldout = true;
-        public object _managedReferenceValue;
-
-        public int _indexInPopup;
+        private bool _foldout = true;
+        private object _managedReferenceValue;
+        private int _indexInPopup;
 
         public ParametersForReference(ReferenceData data, object managedReferenceValue) : base(data)
         {
@@ -41,7 +40,7 @@ namespace ChoiceReferenceEditor
 
         public override void DrawLabel(string label, Rect rectLabel)
         {
-            _foldout = EditorGUI.Foldout(rectLabel, Foldout, label);
+            _foldout = EditorGUI.Foldout(rectLabel, IsHaveFoldout, label);
         }
     }
 }

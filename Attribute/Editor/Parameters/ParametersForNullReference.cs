@@ -8,7 +8,7 @@ namespace ChoiceReferenceEditor
         public override int IndexInPopup => Data.IndexNullVariable;
         public override object ManagedReferenceValue => null;
 
-        public override bool Foldout => false;
+        public override bool IsHaveFoldout => false;
 
         public ParametersForNullReference(ReferenceData data) : base(data)
         {

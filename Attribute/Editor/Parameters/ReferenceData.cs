@@ -8,31 +8,30 @@ using UnityEngine;
 
 namespace ChoiceReferenceEditor
 {
-
     public class ReferenceData
     {
         private const string _nullableNameInPopup = "None";
 
-        //An array is declared here, because EditorGUI.Popup accepts only an array.
+        //An array is declared here, because EditorGUI.Popup accepts only an array
         public readonly string[] TypesNames;
         public readonly ReadOnlyCollection<Type> Types;
 
-        public readonly ChoiceReferenceAttribute Attribute;
+        public readonly IChoiceReferenceParameters DrawParameters;
         public readonly int IndexNullVariable;
 
-        public ReferenceData(Type fieldType, ChoiceReferenceAttribute choiceReferenceAttribute)
+        public ReferenceData(Type fieldType, IChoiceReferenceParameters drawParameters)
         {
             Type typeProperty = ReflectionUtilities.GetArrayOrListElementTypeOrThisType(fieldType);
             Types = ReflectionUtilities.GetFinalAssignableTypesFromAllTypes(typeProperty);
             List<string> typesNames = Types.Select(type => type.Name).ToList();
 
-            if (choiceReferenceAttribute.Nullable)
+            if (drawParameters.Nullable)
                 typesNames.Insert(0, _nullableNameInPopup);
 
             TypesNames = typesNames.ToArray();
 
-            Attribute = choiceReferenceAttribute;
-            IndexNullVariable = choiceReferenceAttribute.Nullable ? 0 : -1;
+            DrawParameters = drawParameters;
+            IndexNullVariable = drawParameters.Nullable ? 0 : -1;
         }
     }
 }

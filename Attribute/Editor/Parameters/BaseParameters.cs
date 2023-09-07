@@ -10,10 +10,10 @@ namespace ChoiceReferenceEditor
 
         public abstract int IndexInPopup { get; }
         public abstract object ManagedReferenceValue { get; }
-        public abstract bool Foldout { get; }
-        public bool IsDrawed { get; set; }
+        public abstract bool IsHaveFoldout { get; }
+        public bool IsDrawn { get; set; }
 
-        public BaseParameters(ReferenceData data)
+        protected BaseParameters(ReferenceData data)
         {
             Data = data;
         }

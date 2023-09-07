@@ -1,12 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using UnityEngine;
 
 [System.Serializable]
-public class ChoiceReferenceAttribute : PropertyAttribute
+public class ChoiceReferenceAttribute : PropertyAttribute, IChoiceReferenceParameters
 {
-    public readonly bool Nullable;
+    public bool Nullable { get; }
 
     public ChoiceReferenceAttribute(bool nullable = false)
     {
