@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace ChoiceReferenceEditor
+namespace ChoiceReference.Editor.Parameters
 {
     public class ParametersForNullReference : BaseParameters
     {

@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEditor;
 using UnityEngine.UIElements;
 
-namespace ChoiceReferenceEditor
+namespace ChoiceReference.Editor
 {
     [CustomPropertyDrawer(typeof(ChoiceReferenceAttribute))]
     public class ChoiceReferenceAttributeDrawer : PropertyDrawer

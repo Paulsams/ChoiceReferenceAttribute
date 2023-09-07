@@ -2,7 +2,7 @@ using System;
 using UnityEditor;
 using UnityEngine;
 
-namespace ChoiceReferenceEditor
+namespace ChoiceReference.Editor.Parameters
 {
     public class ParametersForReference : BaseParameters
     {

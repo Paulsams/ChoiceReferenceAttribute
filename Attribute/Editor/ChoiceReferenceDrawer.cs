@@ -2,13 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using ChoiceReference.Editor.Parameters;
 using Paulsams.MicsUtils;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace ChoiceReferenceEditor
+namespace ChoiceReference.Editor
 {
     public struct ChoiceReferenceDrawerParameters
     {
@@ -18,6 +19,12 @@ namespace ChoiceReferenceEditor
         public ChoiceReferenceDrawerParameters(FieldInfo fieldInfo, IChoiceReferenceParameters drawParameters)
         {
             FieldInfo = fieldInfo;
+            DrawParameters = drawParameters;
+        }
+        
+        public ChoiceReferenceDrawerParameters(SerializedProperty property, IChoiceReferenceParameters drawParameters)
+        {
+            FieldInfo = property.GetFieldInfoFromPropertyPath().field;
             DrawParameters = drawParameters;
         }
     }
