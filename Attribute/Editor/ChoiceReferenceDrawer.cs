@@ -112,16 +112,22 @@ namespace ChoiceReference.Editor
         }
         #endregion
 
-        public static float GetPropertyHeight(SerializedProperty property, ChoiceReferenceDrawerParameters drawerParameters)
+        public static float GetPropertyHeight(SerializedProperty property, GUIContent label,
+            ChoiceReferenceDrawerParameters drawerParameters)
         {
             BaseParameters parameters = GetParameters(property, drawerParameters);
 
             float height = EditorGUIUtility.singleLineHeight;
 
-            LoopFromChildren(parameters, (children) =>
-            {
-                height += EditorGUI.GetPropertyHeight(children, true) + EditorGUIUtility.standardVerticalSpacing;
-            });
+            DrawFromPropertyDrawerOrLoopFromChildren(parameters,
+                (drawer) =>
+                {
+                    height += drawer.GetPropertyHeight(parameters.Property, label) + EditorGUIUtility.standardVerticalSpacing;
+                },
+                (children) =>
+                {
+                    height += EditorGUI.GetPropertyHeight(children, true) + EditorGUIUtility.standardVerticalSpacing;
+                });
 
             return height;
         }
@@ -130,7 +136,7 @@ namespace ChoiceReference.Editor
             ChoiceReferenceDrawerParameters drawerParameters)
         {
             _isCalledOnGui = true;
-            DrawManagedReference(property, label.text, position, drawerParameters);
+            DrawManagedReference(property, label, position, drawerParameters);
         }
         
         public static VisualElement CreateVisualElement(SerializedProperty property, string label,
@@ -140,23 +146,14 @@ namespace ChoiceReference.Editor
             
             Foldout foldout = new Foldout();
             foldout.text = label;
-            Toggle toggle = foldout.Q<Toggle>();
-            VisualElement checkmark = toggle.Q<VisualElement>("unity-checkmark");
+            foldout.contentContainer.style.marginBottom = 1;
+            VisualElementsUtilities.SetAlignedLabelFromFoldout(foldout, out VisualElement containerOnSameRowWithToggle,
+                out VisualElement checkmark);
             void UpdateCheckmark(BaseParameters currentParameters) =>
                 checkmark.style.visibility = currentParameters.IsHaveFoldout
                 ? Visibility.Visible
                 : Visibility.Hidden;
-            
-            toggle.style.height = EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
-            toggle[0].style.flexGrow = toggle[0].style.flexGrow = 0f;
-            // Taken from BaseField<>.m_LabelWidthRatio
-            toggle[0].style.width = new Length(45f, LengthUnit.Percent);
-            foldout.schedule.Execute((_) =>
-            {
-                // Don't ask why. It almost works and fine.
-                // TODO: But it's worth understanding better.
-                toggle[0].style.marginRight = -16f + -7.5f * ((int)foldout.worldBound.x / 15);
-            });
+
             UpdateCheckmark(parameters);
             
             var containerProperties = new VisualElement();
@@ -164,12 +161,26 @@ namespace ChoiceReference.Editor
             
             void DrawChildren(BaseParameters currentParameters)
             {
-                LoopFromChildren(currentParameters, (children) =>
-                {
-                    PropertyField field = new PropertyField(children);
-                    field.BindProperty(children);
-                    containerProperties.Add(field);
-                });
+                DrawFromPropertyDrawerOrLoopFromChildren(currentParameters,
+                    (drawer) =>
+                    {
+                        var container = drawer.CreatePropertyGUI(currentParameters.Property);
+                        if (container == null)
+                        {
+                            var guiContent = new GUIContent(label);
+                            container = new IMGUIContainer(() => drawer.OnGUI(containerProperties.contentRect,
+                                currentParameters.Property,guiContent));
+                            container.style.height = drawer.GetPropertyHeight(currentParameters.Property, guiContent);
+                        }
+
+                        containerProperties.Add(container);
+                    },
+                    (children) =>
+                    {
+                        PropertyField field = new PropertyField(children);
+                        field.BindProperty(children);
+                        containerProperties.Add(field);
+                    });
             }
 
             var popup = new DropdownField(parameters.Data.TypesNames.ToList(), parameters.IndexInPopup);
@@ -186,7 +197,7 @@ namespace ChoiceReference.Editor
                 }
             });
             popup.style.flexGrow = 1;
-            toggle.Add(popup);
+            containerOnSameRowWithToggle.Add(popup);
 
             DrawChildren(parameters);
 
@@ -215,7 +226,7 @@ namespace ChoiceReference.Editor
             }
         }
 
-        private static void DrawManagedReference(SerializedProperty property, string label, Rect rect,
+        private static void DrawManagedReference(SerializedProperty property, GUIContent label, Rect rect,
             ChoiceReferenceDrawerParameters drawerParameters)
         {
             BaseParameters parameters = GetParameters(property, drawerParameters);
@@ -223,13 +234,13 @@ namespace ChoiceReference.Editor
             rect.height = EditorGUIUtility.singleLineHeight;
             Rect rectLabel = rect;
 
-            parameters.DrawLabel(label, rectLabel);
+            parameters.DrawLabel(label.text, rectLabel);
 
             int indexInPopup = DrawPopupAndGetIndex(parameters, rect);
             if (indexInPopup != parameters.IndexInPopup)
                 ChangeManagedReferenceValue(ref parameters, indexInPopup);
 
-            DrawProperty(parameters, rect);
+            DrawProperty(parameters, label, rect);
 
             parameters.IsDrawn = true;
         }
@@ -320,18 +331,24 @@ namespace ChoiceReference.Editor
             return indexInPopup;
         }
 
-        private static void DrawProperty(BaseParameters parameters, Rect rect)
+        private static void DrawProperty(BaseParameters parameters, GUIContent label, Rect rect)
         {
             ++EditorGUI.indentLevel;
             {
                 Rect rectField = rect;
                 rectField.y += rect.height + EditorGUIUtility.standardVerticalSpacing;
 
-                LoopFromChildren(parameters, (children) =>
-                {
-                    EditorGUI.PropertyField(rectField, children, true);
-                    rectField.y += EditorGUI.GetPropertyHeight(children, true) + EditorGUIUtility.standardVerticalSpacing;
-                });
+                DrawFromPropertyDrawerOrLoopFromChildren(parameters,
+                    (drawer) =>
+                    {
+                        rect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
+                        drawer.OnGUI(rect, parameters.Property, label);
+                    },
+                    (children) =>
+                    {
+                        EditorGUI.PropertyField(rectField, children, true);
+                        rectField.y += EditorGUI.GetPropertyHeight(children, true) + EditorGUIUtility.standardVerticalSpacing;
+                    });
             }
             --EditorGUI.indentLevel;
         }
@@ -365,11 +382,25 @@ namespace ChoiceReference.Editor
             return newManagedReference;
         }
 
-        private static void LoopFromChildren(BaseParameters parameters, Action<SerializedProperty> action)
+        private static void DrawFromPropertyDrawerOrLoopFromChildren(BaseParameters parameters,
+            Action<PropertyDrawer> actionFromDrawer,
+            Action<SerializedProperty> actionFromChildren)
         {
             if (parameters.IsHaveFoldout)
-                foreach (var children in parameters.Property.GetChildrens())
-                    action(children);
+            {
+                var drawerType = EditorGUIUtilityWithReflection.GetDrawerTypeForType(
+                    parameters.Property.GetManagedReferenceValueFromPropertyPath().GetType());
+                if (drawerType != null)
+                {
+                    // TODO: Perhaps it is worth set fieldInfo and preferredLabel?
+                    actionFromDrawer((PropertyDrawer) Activator.CreateInstance(drawerType));
+                }
+                else
+                {
+                    foreach (var children in parameters.Property.GetChildren())
+                        actionFromChildren(children);
+                }
+            }
         }
 
         private static ReferenceData GetOrCreateDataReference(ChoiceReferenceDrawerParameters drawerParameters)

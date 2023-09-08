@@ -15,7 +15,7 @@ namespace ChoiceReference.Editor
         
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            return ChoiceReferenceDrawer.GetPropertyHeight(property,
+            return ChoiceReferenceDrawer.GetPropertyHeight(property, label,
                 new ChoiceReferenceDrawerParameters(fieldInfo, attribute as ChoiceReferenceAttribute));
         }
 
@@ -24,5 +24,7 @@ namespace ChoiceReference.Editor
             ChoiceReferenceDrawer.DrawOnGUI(position, property, label,
                 new ChoiceReferenceDrawerParameters(fieldInfo, attribute as ChoiceReferenceAttribute));
         }
+
+        public override bool CanCacheInspectorGUI(SerializedProperty property) => true;
     }
 }
