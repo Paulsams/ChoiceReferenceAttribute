@@ -9,19 +9,19 @@ namespace ChoiceReference.Editor
     {
         public override VisualElement CreatePropertyGUI(SerializedProperty property)
         {
-            return ChoiceReferenceDrawer.CreateVisualElement(property, property.displayName,
+            return ChoiceReferenceDrawer.UIToolkit.Create(property, property.displayName,
                 new ChoiceReferenceDrawerParameters(fieldInfo, attribute as ChoiceReferenceAttribute));
         }
         
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            return ChoiceReferenceDrawer.GetPropertyHeight(property, label,
+            return ChoiceReferenceDrawer.OnGUI.GetPropertyHeight(property, label,
                 new ChoiceReferenceDrawerParameters(fieldInfo, attribute as ChoiceReferenceAttribute));
         }
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            ChoiceReferenceDrawer.DrawOnGUI(position, property, label,
+            ChoiceReferenceDrawer.OnGUI.Draw(position, property, label,
                 new ChoiceReferenceDrawerParameters(fieldInfo, attribute as ChoiceReferenceAttribute));
         }
 
