@@ -153,7 +153,12 @@ namespace ChoiceReference.Editor
 
                 int indexInPopup = DrawPopupAndGetIndex(parameters, rect);
                 if (indexInPopup != parameters.IndexInPopup)
+                {
+                    RemoveReference(GetKey(parameters));
                     ChangeManagedReferenceValue(ref parameters, indexInPopup);
+                    if (parameters is ParametersForReference)
+                        AddReference(GetKey(parameters), parameters);
+                }
 
                 DrawProperty(parameters, label, rect);
 
@@ -215,12 +220,14 @@ namespace ChoiceReference.Editor
                 
                 var containerProperties = new VisualElement();
                 foldout.Add(containerProperties);
-                var popup = CreateDropdown(property, drawerParameters,
+                var popup = CreateDropdown(property,
                     containerProperties,
-                    (_, _) => GetParameters(property, drawerParameters),
+                    () => GetParameters(property, drawerParameters),
                     label,
+                    (currentParameters) => RemoveReference(GetKey(currentParameters)),
                     (currentParameters) =>
                     {
+                        AddReference(GetKey(currentParameters), currentParameters);
                         UpdateCheckmark(currentParameters);
                         foldout.value = true;
                     });
@@ -238,11 +245,11 @@ namespace ChoiceReference.Editor
             }
 
             public static DropdownField CreateDropdown(SerializedProperty property,
-                ChoiceReferenceDrawerParameters drawerParameters,
                 VisualElement containerProperties,
-                Func<SerializedProperty, ChoiceReferenceDrawerParameters, BaseParameters> getterParameters,
+                Func<BaseParameters> getterParameters,
                 string label = null,
-                Action<BaseParameters> valueChangeCallback = null)
+                Action<BaseParameters> valueBeforeChangeCallback = null,
+                Action<BaseParameters> valueAfterChangeCallback = null)
             {
                 void DrawChildren(BaseParameters currentParameters)
                 {
@@ -268,18 +275,19 @@ namespace ChoiceReference.Editor
                         });
                 }
                 
-                BaseParameters parameters = getterParameters(property, drawerParameters);
+                BaseParameters parameters = getterParameters();
                 
                 var popup = new DropdownField(parameters.Data.TypesNames.ToList(), parameters.IndexInPopup);
                 popup.RegisterValueChangedCallback((_) =>
                 {
-                    BaseParameters currentParameters = GetParameters(property, drawerParameters);
+                    BaseParameters currentParameters = getterParameters();
                     if (popup.index != currentParameters.IndexInPopup)
                     {
+                        valueBeforeChangeCallback?.Invoke(currentParameters);
                         ChangeManagedReferenceValue(ref currentParameters, popup.index);
                         containerProperties.Clear();
                         DrawChildren(currentParameters);
-                        valueChangeCallback?.Invoke(currentParameters);
+                        valueAfterChangeCallback?.Invoke(currentParameters);
                     }
                 });
                 popup.style.flexGrow = 1;
@@ -305,7 +313,10 @@ namespace ChoiceReference.Editor
         }
 
         private static BaseParameters GetParameters(SerializedProperty property,
-            ChoiceReferenceDrawerParameters drawerParameters)
+            ChoiceReferenceDrawerParameters drawerParameters) =>
+            GetParameters(property, GetOrCreateDataReference(drawerParameters));
+
+        private static BaseParameters GetParameters(SerializedProperty property, ReferenceData referenceData)
         {
             object managedReferenceValue = property.GetManagedReferenceValueFromPropertyPath();
             var parent = property.GetFieldInfoFromPropertyPath().parentObject;
@@ -314,18 +325,18 @@ namespace ChoiceReference.Editor
             BaseParameters parameters;
             if (managedReferenceValue == null)
             {
-                parameters = new ParametersForNullReference(GetOrCreateDataReference(drawerParameters));
+                parameters = new ParametersForNullReference(referenceData);
             }
             else if (_parameters.TryGetValue(key, out parameters) == false)
             {
                 if (_objects.Contains(managedReferenceValue))
                 {
                     property.managedReferenceValue = null;
-                    parameters = new ParametersForNullReference(GetOrCreateDataReference(drawerParameters));
+                    parameters = new ParametersForNullReference(referenceData);
                 }
                 else
                 {
-                    parameters = new ParametersForReference(GetOrCreateDataReference(drawerParameters), managedReferenceValue);
+                    parameters = new ParametersForReference(referenceData, managedReferenceValue);
                     AddReference(key, parameters);
                 }
             }
@@ -338,25 +349,22 @@ namespace ChoiceReference.Editor
         private static void ChangeManagedReferenceValue(ref BaseParameters parameters, int indexInPopup)
         {
             SerializedProperty property = parameters.Property;
-            object newManagedReference = null;
-
+            
             if (indexInPopup == parameters.Data.IndexNullVariable)
             {
-                RemoveReference(GetKey(parameters));
-
                 parameters = new ParametersForNullReference(parameters.Data);
                 parameters.Property = property;
+                property.managedReferenceValue = null;
             }
             else
             {
                 bool changeReference = true;
-                newManagedReference = CreateManagedReferenceValueAndCopyFields(parameters, indexInPopup, ref changeReference);
+                var newManagedReference = CreateManagedReferenceValueAndCopyFields(parameters, indexInPopup, ref changeReference);
 
                 if (changeReference)
                 {
                     if (parameters is ParametersForReference objectParameters)
                     {
-                        RemoveReference(GetKey(parameters));
                         objectParameters.SetNewManagedReferenceValue(newManagedReference, indexInPopup);
                     }
                     else
@@ -366,16 +374,9 @@ namespace ChoiceReference.Editor
                     }
 
                     parameters = objectParameters;
-                    
-                    property.managedReferenceValue = newManagedReference;
-                    property.serializedObject.ApplyModifiedProperties();
-                    property.serializedObject.Update();
-
-                    AddReference(GetKey(objectParameters), objectParameters);
                 }
             }
 
-            property.managedReferenceValue = newManagedReference;
             property.serializedObject.ApplyModifiedProperties();
         }
 
