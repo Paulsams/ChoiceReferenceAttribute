@@ -63,6 +63,7 @@ namespace ChoiceReference.Editor
         private static readonly FieldInfo _serializedObjectObjectPtrFieldInfo;
 
         private static bool _isCheckUnused;
+        private static bool _didPreviousCalledUpdate;
 
         static ChoiceReferenceDrawer()
         {
@@ -74,10 +75,18 @@ namespace ChoiceReference.Editor
 
         private static void CoroutineForCollectUnusedParameters()
         {
+            // I didn't figure out how best to check for unused parameters ones on the next frame when everything stopped rendering.
+            // Let's at least do this.
             if (_isCheckUnused)
             {
-                CollectUnusedParameters();
                 _isCheckUnused = false;
+                _didPreviousCalledUpdate = true;
+                
+                CollectUnusedParameters();
+            } else if (_didPreviousCalledUpdate)
+            {
+                CollectUnusedParameters();
+                _didPreviousCalledUpdate = false;
             }
         }
 
