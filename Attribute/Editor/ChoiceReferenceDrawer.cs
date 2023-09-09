@@ -50,7 +50,7 @@ namespace ChoiceReference.Editor
 
             public override int GetHashCode()
             {
-                return Value.GetHashCode() + (Parent == null ? 1423542 : Parent.GetHashCode());
+                return (Value == null ? 0 : Value.GetHashCode()) + (Parent == null ? 1423542 : Parent.GetHashCode());
             }
         }
         
@@ -62,7 +62,7 @@ namespace ChoiceReference.Editor
         private static readonly List<KeyForReference> _unusedParameters = new List<KeyForReference>();
         private static readonly FieldInfo _serializedObjectObjectPtrFieldInfo;
 
-        private static bool _isCalledOnGui;
+        private static bool _isCheckUnused;
 
         static ChoiceReferenceDrawer()
         {
@@ -74,10 +74,10 @@ namespace ChoiceReference.Editor
 
         private static void CoroutineForCollectUnusedParameters()
         {
-            if (_isCalledOnGui)
+            if (_isCheckUnused)
             {
                 CollectUnusedParameters();
-                _isCalledOnGui = false;
+                _isCheckUnused = false;
             }
         }
 
@@ -93,15 +93,16 @@ namespace ChoiceReference.Editor
 
         private static void CheckUnusedParameters()
         {
-            foreach (var parameterPair in _parameters)
+            foreach (var (key, parameters) in _parameters)
             {
                 bool isValidSerializedObject = (IntPtr)_serializedObjectObjectPtrFieldInfo.GetValue(
-                    parameterPair.Value.Property.serializedObject) != IntPtr.Zero;
+                    parameters.Property.serializedObject) != IntPtr.Zero;
 
-                if (isValidSerializedObject && parameterPair.Value.IsDrawn == false)
-                    _unusedParameters.Add(parameterPair.Key);
+                if (isValidSerializedObject == false || parameters.DrawnType == DrawnChoiceReferenceType.NotDrawn)
+                    _unusedParameters.Add(key);
 
-                parameterPair.Value.IsDrawn = false;
+                if (parameters.DrawnType == DrawnChoiceReferenceType.OnGUI)
+                    parameters.DrawnType = DrawnChoiceReferenceType.NotDrawn;
             }
         }
         
@@ -137,7 +138,7 @@ namespace ChoiceReference.Editor
             public static void Draw(Rect position, SerializedProperty property, GUIContent label,
                 ChoiceReferenceDrawerParameters drawerParameters)
             {
-                _isCalledOnGui = true;
+                _isCheckUnused = true;
                 DrawManagedReference(property, label, position, drawerParameters);
             }
             
@@ -145,6 +146,7 @@ namespace ChoiceReference.Editor
                 ChoiceReferenceDrawerParameters drawerParameters)
             {
                 BaseParameters parameters = GetParameters(property, drawerParameters);
+                parameters.DrawnType = DrawnChoiceReferenceType.OnGUI;
 
                 rect.height = EditorGUIUtility.singleLineHeight;
                 Rect rectLabel = rect;
@@ -161,8 +163,6 @@ namespace ChoiceReference.Editor
                 }
 
                 DrawProperty(parameters, label, rect);
-
-                parameters.IsDrawn = true;
             }
             
             private static int DrawPopupAndGetIndex(BaseParameters parameters, Rect rect)
@@ -205,6 +205,7 @@ namespace ChoiceReference.Editor
                 ChoiceReferenceDrawerParameters drawerParameters)
             {
                 BaseParameters parameters = GetParameters(property, drawerParameters);
+                parameters.DrawnType = DrawnChoiceReferenceType.UIToolkit;
                 
                 Foldout foldout = new Foldout();
                 foldout.text = label;
@@ -233,13 +234,12 @@ namespace ChoiceReference.Editor
                     });
                 
                 containerOnSameRowWithToggle.Add(popup);
-
-                foldout.schedule.Execute((_) =>
+                
+                foldout.RegisterCallback<DetachFromPanelEvent>(_ =>
                 {
-                    BaseParameters currentParameters = GetParameters(property, drawerParameters);
-                    currentParameters.IsDrawn = true;
-                    _isCalledOnGui = true;
-                }).Every(50);
+                    Debug.Log("Detach");
+                    _isCheckUnused = true;
+                });
                 
                 return foldout;
             }
@@ -284,6 +284,7 @@ namespace ChoiceReference.Editor
                     {
                         valueBeforeChangeCallback?.Invoke(currentParameters);
                         ChangeManagedReferenceValue(ref currentParameters, popup.index);
+                        currentParameters.DrawnType = DrawnChoiceReferenceType.UIToolkit;
                         containerProperties.Clear();
                         DrawChildren(currentParameters);
                         valueAfterChangeCallback?.Invoke(currentParameters);
@@ -350,7 +351,6 @@ namespace ChoiceReference.Editor
             if (indexInPopup == parameters.Data.IndexNullVariable)
             {
                 parameters = new ParametersForNullReference(property, parameters.Data);
-                property.managedReferenceValue = null;
             }
             else
             {

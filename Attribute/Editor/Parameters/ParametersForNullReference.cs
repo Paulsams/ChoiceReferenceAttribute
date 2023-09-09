@@ -13,7 +13,7 @@ namespace ChoiceReference.Editor.Parameters
         public ParametersForNullReference(SerializedProperty property, ReferenceData data)
             : base(property, data)
         {
-
+            property.managedReferenceValue = null;
         }
 
         public override void DrawLabel(string label, Rect rectLabel)

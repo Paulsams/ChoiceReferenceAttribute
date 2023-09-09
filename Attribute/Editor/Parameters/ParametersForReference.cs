@@ -17,11 +17,8 @@ namespace ChoiceReference.Editor.Parameters
         private int _indexInPopup;
 
         public ParametersForReference(SerializedProperty property, ReferenceData data, object managedReferenceValue)
-            : base(property, data)
-        {
-            int indexInPopup = Array.IndexOf(Data.TypesNames, managedReferenceValue.GetType().Name);
-            SetNewManagedReferenceValue(managedReferenceValue, indexInPopup);
-        }
+            : this(property, data, managedReferenceValue,
+                Array.IndexOf(data.TypesNames, managedReferenceValue.GetType().Name)) { }
 
         public ParametersForReference(SerializedProperty property, ReferenceData data,
             object managedReferenceValue, int indexChooseType)
@@ -35,6 +32,7 @@ namespace ChoiceReference.Editor.Parameters
             if (managedReferenceValue == null)
                 throw new ArgumentException();
 
+            Property.managedReferenceValue = managedReferenceValue;
             _managedReferenceValue = managedReferenceValue;
             _indexInPopup = indexInPopup;
 
