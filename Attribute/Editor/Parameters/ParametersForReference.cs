@@ -16,15 +16,18 @@ namespace ChoiceReference.Editor.Parameters
         private object _managedReferenceValue;
         private int _indexInPopup;
 
-        public ParametersForReference(ReferenceData data, object managedReferenceValue) : base(data)
+        public ParametersForReference(SerializedProperty property, ReferenceData data, object managedReferenceValue)
+            : base(property, data)
         {
             int indexInPopup = Array.IndexOf(Data.TypesNames, managedReferenceValue.GetType().Name);
             SetNewManagedReferenceValue(managedReferenceValue, indexInPopup);
         }
 
-        public ParametersForReference(ReferenceData data, object managedReferenceValue, int indexChoicedType) : base(data)
+        public ParametersForReference(SerializedProperty property, ReferenceData data,
+            object managedReferenceValue, int indexChooseType)
+            : base(property, data)
         {
-            SetNewManagedReferenceValue(managedReferenceValue, indexChoicedType);
+            SetNewManagedReferenceValue(managedReferenceValue, indexChooseType);
         }
 
         public void SetNewManagedReferenceValue(object managedReferenceValue, int indexInPopup)

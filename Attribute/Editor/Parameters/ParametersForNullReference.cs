@@ -10,7 +10,8 @@ namespace ChoiceReference.Editor.Parameters
 
         public override bool IsHaveFoldout => false;
 
-        public ParametersForNullReference(ReferenceData data) : base(data)
+        public ParametersForNullReference(SerializedProperty property, ReferenceData data)
+            : base(property, data)
         {
 
         }

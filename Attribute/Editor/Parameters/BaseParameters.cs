@@ -13,7 +13,7 @@ namespace ChoiceReference.Editor.Parameters
         public abstract bool IsHaveFoldout { get; }
         public bool IsDrawn { get; set; }
 
-        protected BaseParameters(ReferenceData data)
+        protected BaseParameters(SerializedProperty property, ReferenceData data)
         {
             Data = data;
         }

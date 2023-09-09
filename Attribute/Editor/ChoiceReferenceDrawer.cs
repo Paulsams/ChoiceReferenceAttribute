@@ -220,7 +220,7 @@ namespace ChoiceReference.Editor
                 
                 var containerProperties = new VisualElement();
                 foldout.Add(containerProperties);
-                var popup = CreateDropdown(property,
+                var popup = CreateDropdown(
                     containerProperties,
                     () => GetParameters(property, drawerParameters),
                     label,
@@ -244,8 +244,7 @@ namespace ChoiceReference.Editor
                 return foldout;
             }
 
-            public static DropdownField CreateDropdown(SerializedProperty property,
-                VisualElement containerProperties,
+            public static DropdownField CreateDropdown(VisualElement containerProperties,
                 Func<BaseParameters> getterParameters,
                 string label = null,
                 Action<BaseParameters> valueBeforeChangeCallback = null,
@@ -259,7 +258,7 @@ namespace ChoiceReference.Editor
                             var container = drawer.CreatePropertyGUI(currentParameters.Property);
                             if (container == null)
                             {
-                                var guiContent = new GUIContent(label == null ? property.displayName : label);
+                                var guiContent = new GUIContent(label == null ? currentParameters.Property.displayName : label);
                                 container = new IMGUIContainer(() => drawer.OnGUI(containerProperties.contentRect,
                                     currentParameters.Property, guiContent));
                                 container.style.height = drawer.GetPropertyHeight(currentParameters.Property, guiContent);
@@ -325,23 +324,21 @@ namespace ChoiceReference.Editor
             BaseParameters parameters;
             if (managedReferenceValue == null)
             {
-                parameters = new ParametersForNullReference(referenceData);
+                parameters = new ParametersForNullReference(property, referenceData);
             }
             else if (_parameters.TryGetValue(key, out parameters) == false)
             {
                 if (_objects.Contains(managedReferenceValue))
                 {
                     property.managedReferenceValue = null;
-                    parameters = new ParametersForNullReference(referenceData);
+                    parameters = new ParametersForNullReference(property, referenceData);
                 }
                 else
                 {
-                    parameters = new ParametersForReference(referenceData, managedReferenceValue);
+                    parameters = new ParametersForReference(property, referenceData, managedReferenceValue);
                     AddReference(key, parameters);
                 }
             }
-            
-            parameters.Property = property;
 
             return parameters;
         }
@@ -352,8 +349,7 @@ namespace ChoiceReference.Editor
             
             if (indexInPopup == parameters.Data.IndexNullVariable)
             {
-                parameters = new ParametersForNullReference(parameters.Data);
-                parameters.Property = property;
+                parameters = new ParametersForNullReference(property, parameters.Data);
                 property.managedReferenceValue = null;
             }
             else
@@ -369,8 +365,7 @@ namespace ChoiceReference.Editor
                     }
                     else
                     {
-                        objectParameters = new ParametersForReference(parameters.Data, newManagedReference, indexInPopup);
-                        objectParameters.Property = property;
+                        objectParameters = new ParametersForReference(property, parameters.Data, newManagedReference, indexInPopup);
                     }
 
                     parameters = objectParameters;
