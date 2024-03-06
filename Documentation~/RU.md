@@ -7,17 +7,21 @@
 2) Выберите "Add package from get URL";
 3) Вставьте ссылки на пакеты, которые являются зависимостями данного пакета:
     + `https://github.com/Paulsams/MiscUtilities.git`
-3) Вставьте ссылку на данный пакет: `https://github.com/Paulsams/ChoiceReferenceAttribute.git`
+4Вставьте ссылку на данный пакет: `https://github.com/Paulsams/ChoiceReferenceAttribute.git`
 
 ## Связанные пакеты
-1) RepairerSerializeReferences (пока что только с 2021.2) - окно редактора, которое позволяет починить ссылки, которые полетели в связи со сменой названия класса, пространстрва имён или сборки: https://github.com/Paulsams/RepairerSerializeReferences
+1) RepairerSerializeReferences (пока что только с 2021.2) - окно редактора, которое позволяет починить ссылки, которые слетели в связи со сменой названия класса, пространстрва имён или сборки: https://github.com/Paulsams/RepairerSerializeReferences
 
 ## Зависимости
 - Использует:
     + MicsUtilities: https://github.com/Paulsams/MiscUtilities.git
 
+# Известные проблемы
+1) При множественном редактировании объектов и нажатии кнопки `-` у листа/массива (и только если это не массив SR, а они вложенные через другие классы) — могут появляться ошибки. Пока идей нет, так как даже стек трейса у сообщений нет, но в остальное множественное редактирование полностью работает.
+2) Нельзя вызывать мою отрисовку со многими `SerializeObject` и это поправимо, но пока не приоритетно.
+
 ## Возможности
-1) Работает для листов/массивов и для любой вложенности данного атрибута.
+1) Работает для листов/массивов и для любой вложенности данного атрибута;
 
 ВАЖНО: чтобы атрибут работал с листами или массивами, то нужно обязательно базовому классу дописать `[System.Serializable]`. Не спрашивайте меня почему - такова жизнь:
 
@@ -26,7 +30,7 @@
 [SerializeReference, ChoiceReference] private List<BaseClass> _listChoiceReferences;
 ```
 
-![image](https://github.com/Paulsams/ChoiceReferenceAttribute/blob/master/Documentation~/Single%20and%20Lists.gif)
+![image](Single%20and%20Lists.gif)
 
 2) Можно в параметрах атрибута указать флаг nullable, который позволяет из выбора убрать задание объекту состояние "null". Если он будет "false" (а это есть значение по умолчанию), то Вам всё равно надо будет в первый раз выбрать тип, а иначе была бы рекурсия, если в объекте будет поле с этим же атрибутом.
 
@@ -35,9 +39,11 @@
 [SerializeReference, ChoiceReference] private BaseClass _singleChoiceReferenceNotNullable;
 ```
 
-![image](https://github.com/Paulsams/ChoiceReferenceAttribute/blob/master/Documentation~/Nullable.gif)
+![image](Nullable.gif)
 
 3) ISerializeReferenceChangeValidate - интерфейс, который вы можете реализовать у наследника для того, чтобы сделать какую-то свою проверку, что валидна ли в данный момент смена типа.
+4) При нажатии на `+` у листов/массива — ссылки (вложенные через доп класс) не копируется (я ещё ни у какой реализации подобных атрибутов не видел этого).
+5) Доступно множественное редактирование объектов.
 
 ## Конструкторы
 ```cs

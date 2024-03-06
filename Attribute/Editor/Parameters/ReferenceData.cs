@@ -10,10 +10,11 @@ namespace ChoiceReference.Editor.Parameters
     {
         private const string _nullableNameInPopup = "None";
 
-        //An array is declared here, because EditorGUI.Popup accepts only an array
+        // An array is declared here, because EditorGUI.Popup accepts only an array
         public readonly string[] TypesNames;
         public readonly ReadOnlyCollection<Type> Types;
-
+        public readonly ReadOnlyDictionary<Type, int> TypeToIndexInPopup;
+        
         public readonly IChoiceReferenceParameters DrawParameters;
         public readonly int IndexNullVariable;
 
@@ -21,6 +22,11 @@ namespace ChoiceReference.Editor.Parameters
         {
             Type typeProperty = ReflectionUtilities.GetArrayOrListElementTypeOrThisType(fieldType);
             Types = ReflectionUtilities.GetFinalAssignableTypesFromAllTypes(typeProperty);
+            TypeToIndexInPopup = new ReadOnlyDictionary<Type, int>(
+                Types
+                .Select((type, i) => (type, i))
+                .ToDictionary(tuple => tuple.type, tuple => tuple.i)
+            );
             List<string> typesNames = Types.Select(type => type.Name).ToList();
 
             if (drawParameters.Nullable)

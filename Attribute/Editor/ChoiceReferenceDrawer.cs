@@ -1,446 +1,227 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using ChoiceReference.Editor.Parameters;
 using Paulsams.MicsUtils;
 using UnityEditor;
-using UnityEditor.UIElements;
 using UnityEngine;
-using UnityEngine.UIElements;
 
-namespace ChoiceReference.Editor
+namespace ChoiceReference.Editor.Drawers
 {
-    public struct ChoiceReferenceDrawerParameters
+    public static partial class ChoiceReferenceDrawer
     {
-        public readonly FieldInfo FieldInfo;
-        public readonly IChoiceReferenceParameters DrawParameters;
-
-        public ChoiceReferenceDrawerParameters(FieldInfo fieldInfo, IChoiceReferenceParameters drawParameters)
+        private class ObjectState
         {
-            FieldInfo = fieldInfo;
-            DrawParameters = drawParameters;
+            public SerializedObject SerializedObject;
+
+            // After thinking a lot, I couldn’t figure out how to do it better
+            public readonly List<WeakReference<object>> WeakReferencesOnObjects = new List<WeakReference<object>>();
+            public readonly HashSet<string> PropertiesNotMetFirstTime = new HashSet<string>();
         }
-        
-        public ChoiceReferenceDrawerParameters(SerializedProperty property, IChoiceReferenceParameters drawParameters)
-        {
-            FieldInfo = property.GetFieldInfoFromPropertyPath().field;
-            DrawParameters = drawParameters;
-        }
-    }
-    
-    public static class ChoiceReferenceDrawer
-    {
-        private struct KeyForReference
-        {
-            public readonly object Value;
-            public readonly object Parent;
 
-            public KeyForReference(object value, object parent)
-            {
-                Value = value;
-                Parent = parent;
-            }
+        // TODO: need to add support for many SerializedObject
+        private static readonly ObjectState _objectState = new ObjectState();
 
-            public override bool Equals(object obj)
-            {
-                return obj is KeyForReference other &&
-                       Value == other.Value && Parent == other.Parent;
-            }
+        private static readonly Dictionary<FieldInfo, ReferenceData> _dataReferences =
+            new Dictionary<FieldInfo, ReferenceData>();
 
-            public override int GetHashCode()
-            {
-                return (Value == null ? 0 : Value.GetHashCode()) + (Parent == null ? 1423542 : Parent.GetHashCode());
-            }
-        }
-        
-        private static readonly Dictionary<KeyForReference, BaseParameters> _parameters = new Dictionary<KeyForReference, BaseParameters>();
-        private static readonly Dictionary<FieldInfo, ReferenceData> _dataReferences = new Dictionary<FieldInfo, ReferenceData>();
-        private static readonly HashSet<object> _objects = new HashSet<object>();
+        #region Removing unused parameters
 
-        #region Remove Deleted Parameters
-        private static readonly List<KeyForReference> _unusedParameters = new List<KeyForReference>();
         private static readonly FieldInfo _serializedObjectObjectPtrFieldInfo;
-
-        private static bool _isCheckUnused;
-        private static bool _didPreviousCalledUpdate;
 
         static ChoiceReferenceDrawer()
         {
             _serializedObjectObjectPtrFieldInfo = typeof(SerializedObject).GetField("m_NativeObjectPtr",
                 BindingFlags.Instance | BindingFlags.NonPublic);
 
+            Selection.selectionChanged += CollectUnusedParameters;
             EditorApplication.update += CoroutineForCollectUnusedParameters;
         }
 
-        private static void CoroutineForCollectUnusedParameters()
-        {
-            // I didn't figure out how best to check for unused parameters ones on the next frame when everything stopped rendering.
-            // Let's at least do this.
-            if (_isCheckUnused)
-            {
-                _isCheckUnused = false;
-                _didPreviousCalledUpdate = true;
-                
-                CollectUnusedParameters();
-            } else if (_didPreviousCalledUpdate)
-            {
-                CollectUnusedParameters();
-                _didPreviousCalledUpdate = false;
-            }
-        }
+        private static void CoroutineForCollectUnusedParameters() => CollectUnusedParameters();
 
         private static void CollectUnusedParameters()
         {
-            CheckUnusedParameters();
+            if (_objectState.SerializedObject == null)
+                return;
 
-            for (int i = 0; i < _unusedParameters.Count; ++i)
-                RemoveReference(_unusedParameters[i]);
+            bool isNotValidSerializedObject = (IntPtr)_serializedObjectObjectPtrFieldInfo
+                .GetValue(_objectState.SerializedObject) == IntPtr.Zero;
 
-            _unusedParameters.Clear();
-        }
-
-        private static void CheckUnusedParameters()
-        {
-            foreach (var (key, parameters) in _parameters)
+            if (isNotValidSerializedObject)
             {
-                bool isValidSerializedObject = (IntPtr)_serializedObjectObjectPtrFieldInfo.GetValue(
-                    parameters.Property.serializedObject) != IntPtr.Zero;
-
-                if (isValidSerializedObject == false || parameters.DrawnType == DrawnChoiceReferenceType.NotDrawn)
-                    _unusedParameters.Add(key);
-
-                if (parameters.DrawnType == DrawnChoiceReferenceType.OnGUI)
-                    parameters.DrawnType = DrawnChoiceReferenceType.NotDrawn;
+                _objectState.SerializedObject = null;
+                _objectState.WeakReferencesOnObjects.Clear();
+                _objectState.PropertiesNotMetFirstTime.Clear();
+                return;
             }
+
+            _objectState.PropertiesNotMetFirstTime.RemoveWhere(propertyPath =>
+                _objectState.SerializedObject.FindProperty(propertyPath) == null);
+
+            _objectState.WeakReferencesOnObjects.RemoveAll(obj => obj.TryGetTarget(out _) == false);
         }
-        
-        private static KeyForReference GetKey(BaseParameters parameters)
-        {
-            return new KeyForReference(parameters.ManagedReferenceValue,
-                parameters.Property.GetFieldInfoFromPropertyPath().parentObject);
-        }
+
         #endregion
 
-        public static class OnGUI
+        private static void AddObject(in PropertyParameters parameters)
         {
-            public static float GetPropertyHeight(SerializedProperty property, GUIContent label,
-                ChoiceReferenceDrawerParameters drawerParameters)
-            {
-                BaseParameters parameters = GetParameters(property, drawerParameters);
-
-                float height = EditorGUIUtility.singleLineHeight;
-
-                DrawFromPropertyDrawerOrLoopFromChildren(parameters,
-                    (drawer) =>
-                    {
-                        height += drawer.GetPropertyHeight(parameters.Property, label) + EditorGUIUtility.standardVerticalSpacing;
-                    },
-                    (children) =>
-                    {
-                        height += EditorGUI.GetPropertyHeight(children, true) + EditorGUIUtility.standardVerticalSpacing;
-                    });
-
-                return height;
-            }
-            
-            public static void Draw(Rect position, SerializedProperty property, GUIContent label,
-                ChoiceReferenceDrawerParameters drawerParameters)
-            {
-                _isCheckUnused = true;
-                DrawManagedReference(property, label, position, drawerParameters);
-            }
-            
-            private static void DrawManagedReference(SerializedProperty property, GUIContent label, Rect rect,
-                ChoiceReferenceDrawerParameters drawerParameters)
-            {
-                BaseParameters parameters = GetParameters(property, drawerParameters);
-                parameters.DrawnType = DrawnChoiceReferenceType.OnGUI;
-
-                rect.height = EditorGUIUtility.singleLineHeight;
-                Rect rectLabel = rect;
-
-                parameters.DrawLabel(label.text, rectLabel);
-
-                int indexInPopup = DrawPopupAndGetIndex(parameters, rect);
-                if (indexInPopup != parameters.IndexInPopup)
-                {
-                    RemoveReference(GetKey(parameters));
-                    ChangeManagedReferenceValue(ref parameters, indexInPopup);
-                    if (parameters is ParametersForReference)
-                        AddReference(GetKey(parameters), parameters);
-                }
-
-                DrawProperty(parameters, label, rect);
-            }
-            
-            private static int DrawPopupAndGetIndex(BaseParameters parameters, Rect rect)
-            {
-                Rect rectPopup = rect;
-                float offset = EditorGUIUtility.labelWidth + 2f - EditorGUI.indentLevel * 15f;
-                rectPopup.x += offset;
-                rectPopup.width -= offset;
-
-                int indexInPopup = EditorGUI.Popup(rectPopup, parameters.IndexInPopup, parameters.Data.TypesNames);
-                return indexInPopup;
-            }
-
-            private static void DrawProperty(BaseParameters parameters, GUIContent label, Rect rect)
-            {
-                ++EditorGUI.indentLevel;
-                {
-                    Rect rectField = rect;
-                    rectField.y += rect.height + EditorGUIUtility.standardVerticalSpacing;
-
-                    DrawFromPropertyDrawerOrLoopFromChildren(parameters,
-                        (drawer) =>
-                        {
-                            rect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
-                            drawer.OnGUI(rect, parameters.Property, label);
-                        },
-                        (children) =>
-                        {
-                            EditorGUI.PropertyField(rectField, children, true);
-                            rectField.y += EditorGUI.GetPropertyHeight(children, true) + EditorGUIUtility.standardVerticalSpacing;
-                        });
-                }
-                --EditorGUI.indentLevel;
-            }
+            if (parameters.ManagedReferenceValue != null)
+                _objectState.WeakReferencesOnObjects
+                    .Add(new WeakReference<object>(parameters.ManagedReferenceValue));
         }
 
-        public static class UIToolkit
+        private static void RemoveObject(in PropertyParameters parameters)
         {
-            public static VisualElement Create(SerializedProperty property, string label,
-                ChoiceReferenceDrawerParameters drawerParameters)
-            {
-                BaseParameters parameters = GetParameters(property, drawerParameters);
-                parameters.DrawnType = DrawnChoiceReferenceType.UIToolkit;
-                
-                Foldout foldout = new Foldout();
-                foldout.text = label;
-                foldout.contentContainer.style.marginBottom = 1;
-                VisualElementsUtilities.SetAlignedLabelFromFoldout(foldout, out VisualElement containerOnSameRowWithToggle,
-                    out VisualElement checkmark);
-                void UpdateCheckmark(BaseParameters currentParameters) =>
-                    checkmark.style.visibility = currentParameters.IsHaveFoldout
-                    ? Visibility.Visible
-                    : Visibility.Hidden;
-
-                UpdateCheckmark(parameters);
-                
-                var containerProperties = new VisualElement();
-                foldout.Add(containerProperties);
-                var popup = CreateDropdown(
-                    containerProperties,
-                    () => GetParameters(property, drawerParameters),
-                    label,
-                    (currentParameters) => RemoveReference(GetKey(currentParameters)),
-                    (currentParameters) =>
-                    {
-                        AddReference(GetKey(currentParameters), currentParameters);
-                        UpdateCheckmark(currentParameters);
-                        foldout.value = true;
-                    });
-                
-                containerOnSameRowWithToggle.Add(popup);
-                
-                foldout.RegisterCallback<DetachFromPanelEvent>(_ =>
-                {
-                    Debug.Log("Detach");
-                    _isCheckUnused = true;
-                });
-                
-                return foldout;
-            }
-
-            public static DropdownField CreateDropdown(VisualElement containerProperties,
-                Func<BaseParameters> getterParameters,
-                string label = null,
-                Action<BaseParameters> valueBeforeChangeCallback = null,
-                Action<BaseParameters> valueAfterChangeCallback = null)
-            {
-                void DrawChildren(BaseParameters currentParameters)
-                {
-                    DrawFromPropertyDrawerOrLoopFromChildren(currentParameters,
-                        (drawer) =>
-                        {
-                            var container = drawer.CreatePropertyGUI(currentParameters.Property);
-                            if (container == null)
-                            {
-                                var guiContent = new GUIContent(label == null ? currentParameters.Property.displayName : label);
-                                container = new IMGUIContainer(() => drawer.OnGUI(containerProperties.contentRect,
-                                    currentParameters.Property, guiContent));
-                                container.style.height = drawer.GetPropertyHeight(currentParameters.Property, guiContent);
-                            }
-
-                            containerProperties.Add(container);
-                        },
-                        (children) =>
-                        {
-                            PropertyField field = new PropertyField(children);
-                            field.BindProperty(children);
-                            containerProperties.Add(field);
-                        });
-                }
-                
-                BaseParameters parameters = getterParameters();
-                
-                var popup = new DropdownField(parameters.Data.TypesNames.ToList(), parameters.IndexInPopup);
-                popup.RegisterValueChangedCallback((_) =>
-                {
-                    BaseParameters currentParameters = getterParameters();
-                    if (popup.index != currentParameters.IndexInPopup)
-                    {
-                        valueBeforeChangeCallback?.Invoke(currentParameters);
-                        ChangeManagedReferenceValue(ref currentParameters, popup.index);
-                        currentParameters.DrawnType = DrawnChoiceReferenceType.UIToolkit;
-                        containerProperties.Clear();
-                        DrawChildren(currentParameters);
-                        valueAfterChangeCallback?.Invoke(currentParameters);
-                    }
-                });
-                popup.style.flexGrow = 1;
-                DrawChildren(parameters);
-                
-                return popup;
-            }
+            if (parameters.ManagedReferenceValue != null)
+                _objectState.WeakReferencesOnObjects
+                    .RemoveAt(GetIndexObject(parameters.ManagedReferenceValue));
         }
 
-        private static void AddReference(KeyForReference key, BaseParameters parameters)
+        private static void SetValueAndSaveProperty(SerializedProperty otherProperty, object newValue)
         {
-            _parameters.Add(key, parameters);
-            _objects.Add(parameters.ManagedReferenceValue);
-        }
-
-        private static void RemoveReference(KeyForReference key)
-        {
-            if (_parameters.TryGetValue(key, out var parameters))
+            foreach (var targetObject in _objectState.SerializedObject.targetObjects)
             {
-                _parameters.Remove(key);
-                _objects.Remove(parameters.ManagedReferenceValue);
+                SerializedObject serializedObject = new SerializedObject(targetObject);
+                SerializedProperty property = serializedObject.FindProperty(otherProperty.propertyPath);
+                property.managedReferenceValue = newValue;
+                property.isExpanded = newValue != null;
+
+                serializedObject.ApplyModifiedProperties();
+                serializedObject.Update();
             }
+
+            _objectState.SerializedObject.Update();
         }
 
-        private static BaseParameters GetParameters(SerializedProperty property,
-            ChoiceReferenceDrawerParameters drawerParameters) =>
-            GetParameters(property, GetOrCreateDataReference(drawerParameters));
+        private static int GetIndexObject(object currentObject) =>
+            currentObject == null
+                ? -1
+                : _objectState.WeakReferencesOnObjects
+                    .FindIndex(reference =>
+                        reference.TryGetTarget(out object obj) &&
+                        object.ReferenceEquals(obj, currentObject));
 
-        private static BaseParameters GetParameters(SerializedProperty property, ReferenceData referenceData)
+        private static PropertyParameters GetParameters(
+            SerializedProperty property, DrawerParameters drawerParameters
+        ) => GetParameters(property, GetOrCreateDataReference(drawerParameters));
+
+        private static PropertyParameters GetParameters(SerializedProperty property, ReferenceData referenceData)
         {
             object managedReferenceValue = property.GetManagedReferenceValueFromPropertyPath();
-            var parent = property.GetFieldInfoFromPropertyPath().parentObject;
-            var key = new KeyForReference(managedReferenceValue, parent);
+            var fieldInfo = property.GetFieldInfoFromPropertyPath();
+            var fieldType = fieldInfo.field.FieldType;
 
-            BaseParameters parameters;
-            if (managedReferenceValue == null)
+            var objectType = fieldInfo.serializedPropertyFieldType == SerializedPropertyFieldType.ArrayElement
+                ? fieldType.IsArray
+                    ? fieldType.GetElementType()
+                    : fieldType.GetGenericArguments()[0]
+                : fieldType;
+            
+            if (_objectState.SerializedObject == null)
+                _objectState.SerializedObject = property.serializedObject;
+
+            bool isNotAssignable = objectType.IsAssignableFrom(managedReferenceValue?.GetType()) == false;
+            bool isSuchPropertyNotAlreadyExisted = _objectState.PropertiesNotMetFirstTime.Add(property.propertyPath);
+
+            if (managedReferenceValue != null && (isNotAssignable || isSuchPropertyNotAlreadyExisted))
             {
-                parameters = new ParametersForNullReference(property, referenceData);
-            }
-            else if (_parameters.TryGetValue(key, out parameters) == false)
-            {
-                if (_objects.Contains(managedReferenceValue))
+                if (GetIndexObject(managedReferenceValue) != -1)
                 {
-                    property.managedReferenceValue = null;
-                    parameters = new ParametersForNullReference(property, referenceData);
+                    managedReferenceValue = null;
+                    SetValueAndSaveProperty(property, null);
                 }
                 else
                 {
-                    parameters = new ParametersForReference(property, referenceData, managedReferenceValue);
-                    AddReference(key, parameters);
+                    AddObject(new PropertyParameters(property, referenceData, managedReferenceValue));
                 }
             }
 
-            return parameters;
+            return new PropertyParameters(property, referenceData, managedReferenceValue);
         }
 
-        private static void ChangeManagedReferenceValue(ref BaseParameters parameters, int indexInPopup)
+        private static void ChangeManagedReferenceValue(ref PropertyParameters parameters, int indexInPopup)
         {
             SerializedProperty property = parameters.Property;
-            
+
             if (indexInPopup == parameters.Data.IndexNullVariable)
             {
-                parameters = new ParametersForNullReference(property, parameters.Data);
+                SetValueAndSaveProperty(property, null);
+                parameters = new PropertyParameters(property, parameters.Data, null);
             }
-            else
+            else if (TryCreateManagedReferenceValueAndCopyFields(parameters, indexInPopup, out var newManagedReference))
             {
-                bool changeReference = true;
-                var newManagedReference = CreateManagedReferenceValueAndCopyFields(parameters, indexInPopup, ref changeReference);
-
-                if (changeReference)
-                {
-                    if (parameters is ParametersForReference objectParameters)
-                    {
-                        objectParameters.SetNewManagedReferenceValue(newManagedReference, indexInPopup);
-                    }
-                    else
-                    {
-                        objectParameters = new ParametersForReference(property, parameters.Data, newManagedReference, indexInPopup);
-                    }
-
-                    parameters = objectParameters;
-                }
+                SetValueAndSaveProperty(property, newManagedReference);
+                parameters = new PropertyParameters(
+                    property, parameters.Data, newManagedReference, indexInPopup
+                );
             }
-
-            property.serializedObject.ApplyModifiedProperties();
         }
 
-        private static object CreateManagedReferenceValueAndCopyFields(BaseParameters parameters, int indexInPopup, ref bool changeReference)
+        private static bool TryCreateManagedReferenceValueAndCopyFields(
+            PropertyParameters parameters, int indexInPopup, out object newManagedReference)
         {
             parameters.Property.serializedObject.Update();
 
             object oldManagedReference = parameters.ManagedReferenceValue;
             int indexChoiceType = indexInPopup;
 
-            //I don't want to add the first element to Types as null, so I make such a crutch.
+            // I don't want to add the first element to Types as null, so I make such a crutch.
             if (parameters.Data.DrawParameters.Nullable)
                 indexChoiceType -= 1;
 
             Type typeNewManagedReference = parameters.Data.Types[indexChoiceType];
-            object newManagedReference = Activator.CreateInstance(typeNewManagedReference);
-
-            var canChangeSerializeReference = newManagedReference as ISerializeReferenceChangeValidate;
-            if (canChangeSerializeReference == null || canChangeSerializeReference.Validate(out string textError))
+            try
             {
-                ReflectionUtilities.CopyFieldsFromSourceToDestination(oldManagedReference, newManagedReference);
-            }
-            else
-            {
-                EditorUtility.DisplayDialog($"Cannot be changed to {typeNewManagedReference}", textError, "Ok");
-                changeReference = false;
-                return null;
-            }
+                newManagedReference = Activator.CreateInstance(typeNewManagedReference);
 
-            return newManagedReference;
-        }
-
-        private static void DrawFromPropertyDrawerOrLoopFromChildren(BaseParameters parameters,
-            Action<PropertyDrawer> actionFromDrawer,
-            Action<SerializedProperty> actionFromChildren)
-        {
-            if (parameters.IsHaveFoldout)
-            {
-                var drawerType = EditorGUIUtilityWithReflection.GetDrawerTypeForType(
-                    parameters.Property.GetManagedReferenceValueFromPropertyPath().GetType());
-                if (drawerType != null)
+                var canChangeSerializeReference = newManagedReference as ISerializeReferenceChangeValidate;
+                if (canChangeSerializeReference == null || canChangeSerializeReference.Validate(out string textError))
                 {
-                    // TODO: Perhaps it is worth set fieldInfo and preferredLabel?
-                    actionFromDrawer((PropertyDrawer) Activator.CreateInstance(drawerType));
+                    ReflectionUtilities.CopyFieldsFromSourceToDestination(oldManagedReference, newManagedReference);
                 }
                 else
                 {
-                    foreach (var children in parameters.Property.GetChildren())
-                        actionFromChildren(children);
+                    EditorUtility.DisplayDialog($"Cannot be changed to {typeNewManagedReference}", textError, "Ok");
+                    newManagedReference = null;
+                    return false;
                 }
+
+                return true;
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception);
+                newManagedReference = null;
+                return false;
             }
         }
 
-        private static ReferenceData GetOrCreateDataReference(ChoiceReferenceDrawerParameters drawerParameters)
+        private static void DrawFromPropertyDrawerOrLoopFromChildren(PropertyParameters parameters,
+            Action<PropertyDrawer> actionFromDrawer,
+            Action<SerializedProperty> actionFromChildren)
+        {
+            if (parameters.IsExpanded)
+            {
+                var drawerType = EditorGUIUtilityWithReflection.GetDrawerTypeForType(
+                    parameters.Property.GetManagedReferenceValueFromPropertyPath().GetType());
+
+                if (drawerType != null)
+                    actionFromDrawer((PropertyDrawer)Activator.CreateInstance(drawerType));
+                else
+                    foreach (var children in parameters.Property.GetChildren())
+                        actionFromChildren(children);
+            }
+        }
+
+        private static ReferenceData GetOrCreateDataReference(DrawerParameters drawerParameters)
         {
             if (_dataReferences.TryGetValue(drawerParameters.FieldInfo, out ReferenceData data) == false)
             {
                 data = new ReferenceData(drawerParameters.FieldInfo.FieldType, drawerParameters.DrawParameters);
                 _dataReferences.Add(drawerParameters.FieldInfo, data);
             }
+
             return data;
         }
     }
