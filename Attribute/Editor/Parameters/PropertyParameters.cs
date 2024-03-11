@@ -33,6 +33,7 @@ namespace ChoiceReference.Editor.Parameters
         private static int GetIndexInPopupFromValue(ReferenceData data, object managedReferenceValue) =>
             managedReferenceValue == null
                 ? data.IndexNullVariable
-                : data.TypeToIndexInPopup[managedReferenceValue.GetType()];
+                : data.TypeToIndexInPopup[managedReferenceValue.GetType()]
+                  + (data.DrawParameters.Nullable ? 1 : 0);
     }
 }

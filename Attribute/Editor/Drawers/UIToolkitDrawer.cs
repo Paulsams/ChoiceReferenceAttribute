@@ -33,13 +33,13 @@ namespace ChoiceReference.Editor.Drawers
                 var containerProperties = new VisualElement();
                 foldout.Add(containerProperties);
                 var popup = CreateDropdown(
+                    property,
                     containerProperties,
-                    () => GetParameters(property, drawerParameters),
+                    () => drawerParameters,
                     label,
-                    (currentParameters) => RemoveObject(currentParameters),
+                    (_) => { },
                     (currentParameters) =>
                     {
-                        AddObject(currentParameters);
                         UpdateCheckmark(currentParameters);
                         foldout.value = true;
                     });
@@ -49,8 +49,10 @@ namespace ChoiceReference.Editor.Drawers
                 return foldout;
             }
 
-            public static DropdownField CreateDropdown(VisualElement containerProperties,
-                Func<PropertyParameters> getterParameters,
+            public static DropdownField CreateDropdown(
+                SerializedProperty property,
+                VisualElement containerProperties,
+                Func<DrawerParameters> getterDrawerParameters,
                 string label = null,
                 Action<PropertyParameters> valueBeforeChangeCallback = null,
                 Action<PropertyParameters> valueAfterChangeCallback = null)
@@ -79,24 +81,27 @@ namespace ChoiceReference.Editor.Drawers
                         });
                 }
                 
-                PropertyParameters parameters = getterParameters();
+                PropertyParameters parameters = GetParameters(property, getterDrawerParameters());
                 ObjectState state = GetOrCreateObjectState(parameters.Property);
                 
                 var popup = new DropdownField(parameters.Data.TypesNames.ToList(), parameters.IndexInPopup);
                 popup.RegisterValueChangedCallback((_) =>
                 {
-                    PropertyParameters currentParameters = getterParameters();
+                    PropertyParameters currentParameters = GetParameters(property, getterDrawerParameters());
                     if (popup.index == currentParameters.IndexInPopup)
                         return;
                     
+                    RemoveObject(currentParameters);
                     valueBeforeChangeCallback?.Invoke(currentParameters);
                     ChangeManagedReferenceValue(ref currentParameters, state, popup.index);
                     if (popup.index != currentParameters.IndexInPopup)
                     {
+                        AddObject(currentParameters);
                         popup.index = currentParameters.IndexInPopup;
                         return;
                     }
 
+                    AddObject(currentParameters);
                     containerProperties.Clear();
                     DrawChildren(currentParameters);
                     valueAfterChangeCallback?.Invoke(currentParameters);
