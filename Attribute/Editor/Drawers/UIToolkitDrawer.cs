@@ -80,6 +80,7 @@ namespace ChoiceReference.Editor.Drawers
                 }
                 
                 PropertyParameters parameters = getterParameters();
+                ObjectState state = GetOrCreateObjectState(parameters.Property);
                 
                 var popup = new DropdownField(parameters.Data.TypesNames.ToList(), parameters.IndexInPopup);
                 popup.RegisterValueChangedCallback((_) =>
@@ -89,7 +90,7 @@ namespace ChoiceReference.Editor.Drawers
                         return;
                     
                     valueBeforeChangeCallback?.Invoke(currentParameters);
-                    ChangeManagedReferenceValue(ref currentParameters, popup.index);
+                    ChangeManagedReferenceValue(ref currentParameters, state, popup.index);
                     if (popup.index != currentParameters.IndexInPopup)
                     {
                         popup.index = currentParameters.IndexInPopup;

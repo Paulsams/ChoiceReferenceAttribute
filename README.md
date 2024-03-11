@@ -20,7 +20,6 @@ To add this package to the project, follow these steps:
 
 # Known Issues
 1) When editing objects multiple times and pressing the `-` button on a sheet/array (and only if this is not an SR array, but they are nested through other classes), errors may appear. There are no ideas yet, since the messages don’t even have a stack trace, but otherwise multiple editing works correctly.
-2) You can’t call my rendering attribute with many `SerializeObject` and this can be fixed, but it’s not a priority yet.
 
 ## Opportunities
 1) Works for lists/array and for any nesting of this attribute;
@@ -51,7 +50,6 @@ IMPORTANT: In order for the attribute to work for lists/array, it is necessary t
 ```cs
 ChoiceReferenceAttribute(bool nullable)
 ```
-
 
 ## Samples
 To download the examples for this package:

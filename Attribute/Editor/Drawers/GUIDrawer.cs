@@ -35,6 +35,7 @@ namespace ChoiceReference.Editor.Drawers
                 DrawerParameters drawerParameters)
             {
                 PropertyParameters parameters = GetParameters(property, drawerParameters);
+                ObjectState state = GetOrCreateObjectState(parameters.Property);
 
                 rect.height = EditorGUIUtility.singleLineHeight;
                 Rect rectLabel = rect;
@@ -48,7 +49,7 @@ namespace ChoiceReference.Editor.Drawers
                 if (indexInPopup != parameters.IndexInPopup)
                 {
                     RemoveObject(parameters);
-                    ChangeManagedReferenceValue(ref parameters, indexInPopup);
+                    ChangeManagedReferenceValue(ref parameters, state, indexInPopup);
                     AddObject(parameters);
                 }
 

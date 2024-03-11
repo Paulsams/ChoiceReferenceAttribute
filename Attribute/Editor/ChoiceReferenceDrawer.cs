@@ -12,15 +12,32 @@ namespace ChoiceReference.Editor.Drawers
     {
         private class ObjectState
         {
-            public SerializedObject SerializedObject;
+            public readonly SerializedObject SerializedObject;
 
             // After thinking a lot, I couldn’t figure out how to do it better
             public readonly List<WeakReference<object>> WeakReferencesOnObjects = new List<WeakReference<object>>();
             public readonly HashSet<string> PropertiesNotMetFirstTime = new HashSet<string>();
+
+            public ObjectState(SerializedObject serializedObject)
+            {
+                SerializedObject = serializedObject;
+            }
+        }
+
+        private struct PropertyParametersWithState
+        {
+            public readonly PropertyParameters Parameters;
+            public readonly ObjectState State;
+
+            public PropertyParametersWithState(PropertyParameters parameters, ObjectState state)
+            {
+                Parameters = parameters;
+                State = state;
+            }
         }
 
         // TODO: need to add support for many SerializedObject
-        private static readonly ObjectState _objectState = new ObjectState();
+        private static readonly Dictionary<SerializedObject, ObjectState> _states = new Dictionary<SerializedObject, ObjectState>();
 
         private static readonly Dictionary<FieldInfo, ReferenceData> _dataReferences =
             new Dictionary<FieldInfo, ReferenceData>();
@@ -28,6 +45,8 @@ namespace ChoiceReference.Editor.Drawers
         #region Removing unused parameters
 
         private static readonly FieldInfo _serializedObjectObjectPtrFieldInfo;
+
+        private static readonly List<ObjectState> _queueUnusedStates = new List<ObjectState>();
 
         static ChoiceReferenceDrawer()
         {
@@ -42,45 +61,66 @@ namespace ChoiceReference.Editor.Drawers
 
         private static void CollectUnusedParameters()
         {
-            if (_objectState.SerializedObject == null)
-                return;
-
-            bool isNotValidSerializedObject = (IntPtr)_serializedObjectObjectPtrFieldInfo
-                .GetValue(_objectState.SerializedObject) == IntPtr.Zero;
-
-            if (isNotValidSerializedObject)
+            foreach (var state in _states.Values)
             {
-                _objectState.SerializedObject = null;
-                _objectState.WeakReferencesOnObjects.Clear();
-                _objectState.PropertiesNotMetFirstTime.Clear();
-                return;
+                if (state.SerializedObject == null)
+                    return;
+
+                bool isNotValidSerializedObject = (IntPtr)_serializedObjectObjectPtrFieldInfo
+                    .GetValue(state.SerializedObject) == IntPtr.Zero;
+
+                if (isNotValidSerializedObject)
+                {
+                    _queueUnusedStates.Add(state);
+                    continue;
+                }
+
+                state.PropertiesNotMetFirstTime.RemoveWhere(propertyPath =>
+                    state.SerializedObject.FindProperty(propertyPath) == null);
+
+                state.WeakReferencesOnObjects.RemoveAll(obj => obj.TryGetTarget(out _) == false);
             }
 
-            _objectState.PropertiesNotMetFirstTime.RemoveWhere(propertyPath =>
-                _objectState.SerializedObject.FindProperty(propertyPath) == null);
-
-            _objectState.WeakReferencesOnObjects.RemoveAll(obj => obj.TryGetTarget(out _) == false);
+            foreach (var unusedState in _queueUnusedStates)
+                _states.Remove(unusedState.SerializedObject);
+            _queueUnusedStates.Clear();
         }
 
         #endregion
 
         private static void AddObject(in PropertyParameters parameters)
         {
+            var state = GetOrCreateObjectState(parameters.Property);
+            
             if (parameters.ManagedReferenceValue != null)
-                _objectState.WeakReferencesOnObjects
+                state.WeakReferencesOnObjects
                     .Add(new WeakReference<object>(parameters.ManagedReferenceValue));
         }
 
         private static void RemoveObject(in PropertyParameters parameters)
         {
+            var state = GetOrCreateObjectState(parameters.Property);
+
             if (parameters.ManagedReferenceValue != null)
-                _objectState.WeakReferencesOnObjects
-                    .RemoveAt(GetIndexObject(parameters.ManagedReferenceValue));
+                state.WeakReferencesOnObjects
+                    .RemoveAt(GetIndexObject(state, parameters.ManagedReferenceValue));
         }
 
-        private static void SetValueAndSaveProperty(SerializedProperty otherProperty, object newValue)
+        private static ObjectState GetOrCreateObjectState(SerializedProperty property)
         {
-            foreach (var targetObject in _objectState.SerializedObject.targetObjects)
+            var serializedObject = property.serializedObject;
+            if (_states.TryGetValue(serializedObject, out var state) == false)
+            {
+                state = new ObjectState(serializedObject);
+                _states.Add(serializedObject, state);
+            }
+
+            return state;
+        }
+
+        private static void SetValueAndSaveProperty(ObjectState state, SerializedProperty otherProperty, object newValue)
+        {
+            foreach (var targetObject in state.SerializedObject.targetObjects)
             {
                 SerializedObject serializedObject = new SerializedObject(targetObject);
                 SerializedProperty property = serializedObject.FindProperty(otherProperty.propertyPath);
@@ -91,16 +131,18 @@ namespace ChoiceReference.Editor.Drawers
                 serializedObject.Update();
             }
 
-            _objectState.SerializedObject.Update();
+            state.SerializedObject.Update();
         }
 
-        private static int GetIndexObject(object currentObject) =>
-            currentObject == null
+        private static int GetIndexObject(ObjectState state, object currentObject)
+        {
+            return currentObject == null
                 ? -1
-                : _objectState.WeakReferencesOnObjects
+                : state.WeakReferencesOnObjects
                     .FindIndex(reference =>
                         reference.TryGetTarget(out object obj) &&
                         object.ReferenceEquals(obj, currentObject));
+        }
 
         private static PropertyParameters GetParameters(
             SerializedProperty property, DrawerParameters drawerParameters
@@ -117,19 +159,18 @@ namespace ChoiceReference.Editor.Drawers
                     ? fieldType.GetElementType()
                     : fieldType.GetGenericArguments()[0]
                 : fieldType;
-            
-            if (_objectState.SerializedObject == null)
-                _objectState.SerializedObject = property.serializedObject;
+
+            var state = GetOrCreateObjectState(property);
 
             bool isNotAssignable = objectType.IsAssignableFrom(managedReferenceValue?.GetType()) == false;
-            bool isSuchPropertyNotAlreadyExisted = _objectState.PropertiesNotMetFirstTime.Add(property.propertyPath);
+            bool isSuchPropertyNotAlreadyExisted = state.PropertiesNotMetFirstTime.Add(property.propertyPath);
 
             if (managedReferenceValue != null && (isNotAssignable || isSuchPropertyNotAlreadyExisted))
             {
-                if (GetIndexObject(managedReferenceValue) != -1)
+                if (GetIndexObject(state, managedReferenceValue) != -1)
                 {
                     managedReferenceValue = null;
-                    SetValueAndSaveProperty(property, null);
+                    SetValueAndSaveProperty(state, property, null);
                 }
                 else
                 {
@@ -140,18 +181,19 @@ namespace ChoiceReference.Editor.Drawers
             return new PropertyParameters(property, referenceData, managedReferenceValue);
         }
 
-        private static void ChangeManagedReferenceValue(ref PropertyParameters parameters, int indexInPopup)
+        private static void ChangeManagedReferenceValue(ref PropertyParameters parameters, ObjectState state, int indexInPopup)
         {
-            SerializedProperty property = parameters.Property;
+            var property = parameters.Property;
+            var data = parameters.Data;
 
-            if (indexInPopup == parameters.Data.IndexNullVariable)
+            if (indexInPopup == data.IndexNullVariable)
             {
-                SetValueAndSaveProperty(property, null);
-                parameters = new PropertyParameters(property, parameters.Data, null);
+                SetValueAndSaveProperty(state, property, null);
+                parameters = new PropertyParameters(property, data, null);
             }
             else if (TryCreateManagedReferenceValueAndCopyFields(parameters, indexInPopup, out var newManagedReference))
             {
-                SetValueAndSaveProperty(property, newManagedReference);
+                SetValueAndSaveProperty(state, property, newManagedReference);
                 parameters = new PropertyParameters(
                     property, parameters.Data, newManagedReference, indexInPopup
                 );
@@ -159,7 +201,7 @@ namespace ChoiceReference.Editor.Drawers
         }
 
         private static bool TryCreateManagedReferenceValueAndCopyFields(
-            PropertyParameters parameters, int indexInPopup, out object newManagedReference)
+            in PropertyParameters parameters, int indexInPopup, out object newManagedReference)
         {
             parameters.Property.serializedObject.Update();
 
