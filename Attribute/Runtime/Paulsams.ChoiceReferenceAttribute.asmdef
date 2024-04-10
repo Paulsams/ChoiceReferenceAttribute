@@ -1,5 +1,5 @@
 {
-    "name": "Paulsams.ChoiceReferenceAttribute.Runtime",
+    "name": "Paulsams.ChoiceReferenceAttribute",
     "rootNamespace": "",
     "references": [],
     "includePlatforms": [],

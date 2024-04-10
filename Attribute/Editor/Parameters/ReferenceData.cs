@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using UnityEditor;
 
 namespace ChoiceReference.Editor.Parameters
 {
@@ -21,7 +22,8 @@ namespace ChoiceReference.Editor.Parameters
         public ReferenceData(Type fieldType, IChoiceReferenceParameters drawParameters)
         {
             Type typeProperty = ReflectionUtilities.GetArrayOrListElementTypeOrThisType(fieldType);
-            Types = ReflectionUtilities.GetFinalAssignableTypesFromAllTypes(typeProperty);
+            Types = Array.AsReadOnly(TypeCache.GetTypesDerivedFrom(typeProperty)
+                .Where(type => type.IsAbstract == false && type.IsInterface == false).ToArray());
             TypeToIndexInPopup = new ReadOnlyDictionary<Type, int>(
                 Types
                 .Select((type, i) => (type, i))
