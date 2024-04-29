@@ -245,14 +245,20 @@ namespace ChoiceReference.Editor.Drawers
         {
             if (parameters.IsExpanded)
             {
-                var drawerType = EditorGUIUtilityWithReflection.GetDrawerTypeForType(
-                    parameters.Property.GetManagedReferenceValueFromPropertyPath().GetType());
+                var drawerType = EditorGUIUtilityInternal.GetDrawerTypeForPropertyAndType(
+                    parameters.Property,
+                    parameters.Property.GetManagedReferenceValueFromPropertyPath().GetType()
+                );
 
                 if (drawerType != null)
+                {
                     actionFromDrawer((PropertyDrawer)Activator.CreateInstance(drawerType));
+                }
                 else
+                {
                     foreach (var children in parameters.Property.GetChildren())
                         actionFromChildren(children);
+                }
             }
         }
 
