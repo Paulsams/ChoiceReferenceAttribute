@@ -17,19 +17,21 @@ namespace ChoiceReference.Editor.Drawers
                 DrawerParameters drawerParameters)
             {
                 PropertyParameters parameters = GetParameters(property, drawerParameters);
-                
+
                 Foldout foldout = new Foldout();
                 foldout.text = label;
+                foldout.BindProperty(property);
                 foldout.contentContainer.style.marginBottom = 1;
                 VisualElementsUtilities.SetAlignedLabelFromFoldout(foldout, out var containerOnSameRowWithToggle,
                     out VisualElement checkmark);
+
                 void UpdateCheckmark(PropertyParameters currentParameters) =>
-                    checkmark.style.visibility = currentParameters.IsExpanded
-                    ? Visibility.Visible
-                    : Visibility.Hidden;
+                    checkmark.style.visibility = currentParameters.MayExpanded
+                        ? Visibility.Visible
+                        : Visibility.Hidden;
 
                 UpdateCheckmark(parameters);
-                
+
                 var containerProperties = new VisualElement();
                 foldout.Add(containerProperties);
                 var popup = CreateDropdown(
@@ -43,9 +45,9 @@ namespace ChoiceReference.Editor.Drawers
                         UpdateCheckmark(currentParameters);
                         foldout.value = true;
                     });
-                
+
                 containerOnSameRowWithToggle.Add(popup);
-                
+
                 return foldout;
             }
 
@@ -65,10 +67,12 @@ namespace ChoiceReference.Editor.Drawers
                             var container = drawer.CreatePropertyGUI(currentParameters.Property);
                             if (container == null)
                             {
-                                var guiContent = new GUIContent(label == null ? currentParameters.Property.displayName : label);
+                                var guiContent =
+                                    new GUIContent(label == null ? currentParameters.Property.displayName : label);
                                 container = new IMGUIContainer(() => drawer.OnGUI(containerProperties.contentRect,
                                     currentParameters.Property, guiContent));
-                                container.style.height = drawer.GetPropertyHeight(currentParameters.Property, guiContent);
+                                container.style.height =
+                                    drawer.GetPropertyHeight(currentParameters.Property, guiContent);
                             }
 
                             containerProperties.Add(container);
@@ -80,17 +84,17 @@ namespace ChoiceReference.Editor.Drawers
                             containerProperties.Add(field);
                         });
                 }
-                
+
                 PropertyParameters parameters = GetParameters(property, getterDrawerParameters());
                 ObjectState state = GetOrCreateObjectState(parameters.Property);
-                
+
                 var popup = new DropdownField(parameters.Data.TypesNames.ToList(), parameters.IndexInPopup);
                 popup.RegisterValueChangedCallback((_) =>
                 {
                     PropertyParameters currentParameters = GetParameters(property, getterDrawerParameters());
                     if (popup.index == currentParameters.IndexInPopup)
                         return;
-                    
+
                     RemoveObject(currentParameters);
                     valueBeforeChangeCallback?.Invoke(currentParameters);
                     ChangeManagedReferenceValue(ref currentParameters, state, popup.index);
@@ -108,7 +112,7 @@ namespace ChoiceReference.Editor.Drawers
                 });
                 popup.style.flexGrow = 1;
                 DrawChildren(parameters);
-                
+
                 return popup;
             }
         }

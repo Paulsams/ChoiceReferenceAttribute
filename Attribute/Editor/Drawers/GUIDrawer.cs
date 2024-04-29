@@ -12,21 +12,23 @@ namespace ChoiceReference.Editor.Drawers
                 DrawerParameters drawerParameters)
             {
                 PropertyParameters parameters = GetParameters(property, drawerParameters);
-                
+
                 float height = EditorGUIUtility.singleLineHeight;
                 DrawFromPropertyDrawerOrLoopFromChildren(parameters,
                     (drawer) =>
                     {
-                        height += drawer.GetPropertyHeight(parameters.Property, label) + EditorGUIUtility.standardVerticalSpacing;
+                        height += drawer.GetPropertyHeight(parameters.Property, label) +
+                                  EditorGUIUtility.standardVerticalSpacing;
                     },
                     (children) =>
                     {
-                        height += EditorGUI.GetPropertyHeight(children, true) + EditorGUIUtility.standardVerticalSpacing;
+                        height += EditorGUI.GetPropertyHeight(children, true) +
+                                  EditorGUIUtility.standardVerticalSpacing;
                     });
 
                 return height;
             }
-            
+
             public static void Draw(Rect position, SerializedProperty property, GUIContent label,
                 DrawerParameters drawerParameters) =>
                 DrawManagedReference(property, label, position, drawerParameters);
@@ -39,11 +41,12 @@ namespace ChoiceReference.Editor.Drawers
 
                 rect.height = EditorGUIUtility.singleLineHeight;
                 Rect rectLabel = rect;
+                rectLabel.width = EditorGUIUtility.labelWidth;
 
-                if (parameters.ManagedReferenceValue == null)
-                    EditorGUI.LabelField(rectLabel, label.text);
+                if (parameters.MayExpanded)
+                    property.isExpanded = EditorGUI.Foldout(rectLabel, property.isExpanded, label, true);
                 else
-                    property.isExpanded = EditorGUI.Foldout(rectLabel, property.isExpanded, label);
+                    EditorGUI.LabelField(rectLabel, label.text);
 
                 int indexInPopup = DrawPopupAndGetIndex(parameters, rect);
                 if (indexInPopup != parameters.IndexInPopup)
@@ -83,7 +86,8 @@ namespace ChoiceReference.Editor.Drawers
                         (children) =>
                         {
                             EditorGUI.PropertyField(rectField, children, true);
-                            rectField.y += EditorGUI.GetPropertyHeight(children, true) + EditorGUIUtility.standardVerticalSpacing;
+                            rectField.y += EditorGUI.GetPropertyHeight(children, true) +
+                                           EditorGUIUtility.standardVerticalSpacing;
                         });
                 }
                 --EditorGUI.indentLevel;

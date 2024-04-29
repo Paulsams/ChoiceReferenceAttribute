@@ -14,7 +14,7 @@ namespace ChoiceReference.Editor.Drawers
             FieldInfo = fieldInfo;
             DrawParameters = drawParameters;
         }
-    
+
         public DrawerParameters(SerializedProperty property, IChoiceReferenceParameters drawParameters)
         {
             FieldInfo = property.GetFieldInfoFromPropertyPath().field;

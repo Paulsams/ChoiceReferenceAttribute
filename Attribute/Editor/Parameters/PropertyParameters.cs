@@ -10,8 +10,8 @@ namespace ChoiceReference.Editor.Parameters
         public readonly SerializedProperty Property;
         public readonly int IndexInPopup;
         public readonly object ManagedReferenceValue;
-        
-        public bool IsExpanded => Property.isExpanded;
+
+        public bool MayExpanded { get; }
 
         public PropertyParameters(SerializedProperty property, ReferenceData data)
             : this(property, data, property.GetManagedReferenceValueFromPropertyPath()) { }
@@ -27,9 +27,9 @@ namespace ChoiceReference.Editor.Parameters
             Data = data;
             ManagedReferenceValue = newManagedReferenceValue;
             IndexInPopup = indexInPopup;
-            Property.isExpanded = IndexInPopup != Data.IndexNullVariable;
+            MayExpanded = IndexInPopup != Data.IndexNullVariable;
         }
-        
+
         private static int GetIndexInPopupFromValue(ReferenceData data, object managedReferenceValue) =>
             managedReferenceValue == null
                 ? data.IndexNullVariable

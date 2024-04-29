@@ -1,6 +1,6 @@
 {
   "name": "com.paulsams.choice-reference-attribute",
-  "version": "2.2.4",
+  "version": "2.2.5",
   "displayName": "ChoiceReferenceAttribute",
   "dependencies": {
     "com.paulsams.misc-utilities": "2.0.0"

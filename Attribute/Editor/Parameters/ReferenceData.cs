@@ -15,7 +15,7 @@ namespace ChoiceReference.Editor.Parameters
         public readonly string[] TypesNames;
         public readonly ReadOnlyCollection<Type> Types;
         public readonly ReadOnlyDictionary<Type, int> TypeToIndexInPopup;
-        
+
         public readonly IChoiceReferenceParameters DrawParameters;
         public readonly int IndexNullVariable;
 
@@ -26,8 +26,8 @@ namespace ChoiceReference.Editor.Parameters
                 .Where(type => type.IsAbstract == false && type.IsInterface == false).ToArray());
             TypeToIndexInPopup = new ReadOnlyDictionary<Type, int>(
                 Types
-                .Select((type, i) => (type, i))
-                .ToDictionary(tuple => tuple.type, tuple => tuple.i)
+                    .Select((type, i) => (type, i))
+                    .ToDictionary(tuple => tuple.type, tuple => tuple.i)
             );
             List<string> typesNames = Types.Select(type => type.Name).ToList();
 

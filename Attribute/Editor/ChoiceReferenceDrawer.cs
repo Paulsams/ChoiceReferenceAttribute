@@ -37,7 +37,8 @@ namespace ChoiceReference.Editor.Drawers
         }
 
         // TODO: need to add support for many SerializedObject
-        private static readonly Dictionary<SerializedObject, ObjectState> _states = new Dictionary<SerializedObject, ObjectState>();
+        private static readonly Dictionary<SerializedObject, ObjectState> _states =
+            new Dictionary<SerializedObject, ObjectState>();
 
         private static readonly Dictionary<FieldInfo, ReferenceData> _dataReferences =
             new Dictionary<FieldInfo, ReferenceData>();
@@ -91,7 +92,7 @@ namespace ChoiceReference.Editor.Drawers
         private static void AddObject(in PropertyParameters parameters)
         {
             var state = GetOrCreateObjectState(parameters.Property);
-            
+
             if (parameters.ManagedReferenceValue != null)
                 state.WeakReferencesOnObjects
                     .Add(new WeakReference<object>(parameters.ManagedReferenceValue));
@@ -118,7 +119,8 @@ namespace ChoiceReference.Editor.Drawers
             return state;
         }
 
-        private static void SetValueAndSaveProperty(ObjectState state, SerializedProperty otherProperty, object newValue)
+        private static void SetValueAndSaveProperty(ObjectState state,
+            SerializedProperty otherProperty, object newValue)
         {
             foreach (var targetObject in state.SerializedObject.targetObjects)
             {
@@ -181,7 +183,8 @@ namespace ChoiceReference.Editor.Drawers
             return new PropertyParameters(property, referenceData, managedReferenceValue);
         }
 
-        private static void ChangeManagedReferenceValue(ref PropertyParameters parameters, ObjectState state, int indexInPopup)
+        private static void ChangeManagedReferenceValue(ref PropertyParameters parameters,
+            ObjectState state, int indexInPopup)
         {
             var property = parameters.Property;
             var data = parameters.Data;
@@ -243,7 +246,7 @@ namespace ChoiceReference.Editor.Drawers
             Action<PropertyDrawer> actionFromDrawer,
             Action<SerializedProperty> actionFromChildren)
         {
-            if (parameters.IsExpanded)
+            if (parameters.MayExpanded && parameters.Property.isExpanded)
             {
                 var drawerType = EditorGUIUtilityInternal.GetDrawerTypeForPropertyAndType(
                     parameters.Property,
