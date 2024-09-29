@@ -1,9 +1,9 @@
-using ChoiceReference.Editor.Drawers;
+using Paulsams.MicsUtils.ChoiceReference.Editor.Drawers;
 using UnityEngine;
 using UnityEditor;
 using UnityEngine.UIElements;
 
-namespace ChoiceReference.Editor
+namespace Paulsams.MicsUtils.ChoiceReference.Editor
 {
     [CustomPropertyDrawer(typeof(ChoiceReferenceAttribute))]
     public class ChoiceReferenceAttributeDrawer : PropertyDrawer

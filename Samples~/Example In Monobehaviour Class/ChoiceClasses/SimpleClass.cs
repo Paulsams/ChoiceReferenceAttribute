@@ -1,9 +1,12 @@
 using UnityEngine;
 
-public class SimpleClass : BaseClass
+namespace Paulsams.MicsUtils.ChoiceReference.Example
 {
-    [SerializeField] private string _string;
+    public class SimpleClass : BaseClass
+    {
+        [SerializeField] private string _string;
 
-    [Header("Test Header")]
-    [SerializeField] private Vector3 _vector;
+        [Header("Test Header")] [SerializeField]
+        private Vector3 _vector;
+    }
 }

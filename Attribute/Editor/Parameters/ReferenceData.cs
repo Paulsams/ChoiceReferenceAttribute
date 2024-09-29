@@ -1,11 +1,10 @@
-using Paulsams.MicsUtils;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using UnityEditor;
 
-namespace ChoiceReference.Editor.Parameters
+namespace Paulsams.MicsUtils.ChoiceReference.Editor.Parameters
 {
     public class ReferenceData
     {

@@ -1,8 +1,6 @@
-using Paulsams.MicsUtils;
 using UnityEditor;
-using UnityEngine;
 
-namespace ChoiceReference.Editor.Parameters
+namespace Paulsams.MicsUtils.ChoiceReference.Editor.Parameters
 {
     public struct PropertyParameters
     {

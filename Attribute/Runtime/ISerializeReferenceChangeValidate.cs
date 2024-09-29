@@ -1,4 +1,7 @@
-public interface ISerializeReferenceChangeValidate
+namespace Paulsams.MicsUtils
 {
-    bool Validate(out string textError);
+    public interface ISerializeReferenceChangeValidate
+    {
+        bool Validate(out string textError);
+    }
 }

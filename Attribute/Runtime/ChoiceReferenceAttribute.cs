@@ -1,13 +1,15 @@
 using UnityEngine;
 
-
-[System.Serializable]
-public class ChoiceReferenceAttribute : PropertyAttribute, IChoiceReferenceParameters
+namespace Paulsams.MicsUtils
 {
-    public bool Nullable { get; }
-
-    public ChoiceReferenceAttribute(bool nullable = false)
+    [System.Serializable]
+    public class ChoiceReferenceAttribute : PropertyAttribute, IChoiceReferenceParameters
     {
-        Nullable = nullable;
+        public bool Nullable { get; }
+
+        public ChoiceReferenceAttribute(bool nullable = false)
+        {
+            Nullable = nullable;
+        }
     }
 }

@@ -3,14 +3,14 @@ using UnityEngine;
 namespace Paulsams.MicsUtils.ChoiceReference.Example
 {
     [System.Serializable]
-    public struct Data
+    public struct NewData
     {
         [SerializeField] private float _speed;
         [SerializeField] private Vector2 _direction;
     }
 
-    public class ClassWithData : BaseClass
+    public class ClassWithNewData : BaseClass
     {
-        [SerializeField, Ignore] private Data _data;
+        [SerializeField, Ignore] private NewData _data;
     }
 }

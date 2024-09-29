@@ -1,8 +1,7 @@
 ﻿using System.Reflection;
-using Paulsams.MicsUtils;
 using UnityEditor;
 
-namespace ChoiceReference.Editor.Drawers
+namespace Paulsams.MicsUtils.ChoiceReference.Editor.Drawers
 {
     public struct DrawerParameters
     {

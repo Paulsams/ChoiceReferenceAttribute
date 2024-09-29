@@ -1,8 +1,8 @@
-﻿using ChoiceReference.Editor.Parameters;
+﻿using Paulsams.MicsUtils.ChoiceReference.Editor.Parameters;
 using UnityEditor;
 using UnityEngine;
 
-namespace ChoiceReference.Editor.Drawers
+namespace Paulsams.MicsUtils.ChoiceReference.Editor.Drawers
 {
     public static partial class ChoiceReferenceDrawer
     {
@@ -11,6 +11,7 @@ namespace ChoiceReference.Editor.Drawers
             public static float GetPropertyHeight(SerializedProperty property, GUIContent label,
                 DrawerParameters drawerParameters)
             {
+                property.serializedObject.ApplyModifiedProperties();
                 PropertyParameters parameters = GetParameters(property, drawerParameters);
 
                 float height = EditorGUIUtility.singleLineHeight;

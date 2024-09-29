@@ -1,6 +1,9 @@
 using UnityEngine;
 
-public class ClassWithChoiceReferenceNew : BaseClass
+namespace Paulsams.MicsUtils.ChoiceReference.Example
 {
-    [SerializeReference, ChoiceReference] private BaseClass _singleChoiceReference;
+    public class ClassWithChoiceReferenceNew : BaseClass
+    {
+        [SerializeReference, ChoiceReference] private BaseClass _singleChoiceReference;
+    }
 }

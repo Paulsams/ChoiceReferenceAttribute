@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using ChoiceReference.Editor.Parameters;
-using Paulsams.MicsUtils;
+using Paulsams.MicsUtils.ChoiceReference.Editor.Parameters;
 using UnityEditor;
 using UnityEngine;
 
-namespace ChoiceReference.Editor.Drawers
+namespace Paulsams.MicsUtils.ChoiceReference.Editor.Drawers
 {
     public static partial class ChoiceReferenceDrawer
     {

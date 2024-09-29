@@ -1,20 +1,16 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Paulsams.MicsUtil;
 
-public class Example : MonoBehaviour
+namespace Paulsams.MicsUtils.ChoiceReference.Example
 {
-    [Header("Single and Lists")]
-    [SerializeReference, ChoiceReference] private BaseClass _singleChoiceReference;
+    public class ExampleChoiceReferenceAttribute : MonoBehaviour
+    {
+        [Header("Single and Lists")]
+        [SerializeReference, ChoiceReference] private BaseClass _singleChoiceReference;
+        [SerializeReference, ChoiceReference] private List<BaseClass> _listChoiceReferences;
 
-    [SerializeReference, ChoiceReference] private List<BaseClass> _listChoiceReferences;
-
-    [Header("Nullable")]
-    [SerializeReference, ChoiceReference(true)] private BaseClass _singleChoiceReferenceNullable;
-    [SerializeReference, ChoiceReference] private BaseClass _singleChoiceReferenceNotNullable;
-
-    [Header("Ignore Datas")]
-    [SerializeReference, ChoiceReference("_data")] private BaseClass _singleChoiceReferenceWithIgnoreData;
-    [SerializeReference, ChoiceReference] private BaseClass _singleChoiceReferenceNotIgnoreData;
+        [Header("Nullable")]
+        [SerializeReference, ChoiceReference(true)] private BaseClass _singleChoiceReferenceNullable;
+        [SerializeReference, ChoiceReference] private BaseClass _singleChoiceReferenceNotNullable;
+    }
 }

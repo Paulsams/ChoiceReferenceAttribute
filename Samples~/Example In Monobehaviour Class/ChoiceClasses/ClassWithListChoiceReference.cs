@@ -1,8 +1,10 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ClassWithListChoiceReference : BaseClass
+namespace Paulsams.MicsUtils.ChoiceReference.Example
 {
-    [SerializeReference, ChoiceReference] private List<BaseClass> _listChoiceReferences;
+    public class ClassWithListChoiceReference : BaseClass
+    {
+        [SerializeReference, ChoiceReference] private List<BaseClass> _listChoiceReferences;
+    }
 }

@@ -1,7 +1,10 @@
 using UnityEngine;
 
-[System.Serializable]
-public abstract class BaseClass
+namespace Paulsams.MicsUtils.ChoiceReference.Example
 {
-    [SerializeField] private int _sharedInt;
+    [System.Serializable]
+    public abstract class BaseClass
+    {
+        [SerializeField] private int _sharedInt;
+    }
 }
