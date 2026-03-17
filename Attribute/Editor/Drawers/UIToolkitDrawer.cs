@@ -79,7 +79,6 @@ namespace Paulsams.MicsUtils.ChoiceReference.Editor.Drawers
                 }
 
                 PropertyParameters parameters = GetParameters(property, getterDrawerParameters());
-                ObjectState state = GetOrCreateObjectState(parameters.Property);
 
                 var popup = new DropdownField(parameters.Data.TypesNames.ToList(), parameters.IndexInPopup);
                 popup.RegisterValueChangedCallback((_) =>
@@ -88,17 +87,14 @@ namespace Paulsams.MicsUtils.ChoiceReference.Editor.Drawers
                     if (popup.index == currentParameters.IndexInPopup)
                         return;
 
-                    RemoveObject(currentParameters);
                     valueBeforeChangeCallback?.Invoke(currentParameters);
-                    ChangeManagedReferenceValue(ref currentParameters, state, popup.index);
+                    ChangeManagedReferenceValue(ref currentParameters, popup.index);
                     if (popup.index != currentParameters.IndexInPopup)
                     {
-                        AddObject(currentParameters);
                         popup.index = currentParameters.IndexInPopup;
                         return;
                     }
 
-                    AddObject(currentParameters);
                     containerProperties.Clear();
                     DrawChildren(currentParameters);
                     valueAfterChangeCallback?.Invoke(currentParameters);

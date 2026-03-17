@@ -12,14 +12,11 @@ To add this package to the project, follow these steps:
 4) Insert this link `https://github.com/Paulsams/ChoiceReferenceAttribute.git`
 
 ## Related Packages
-1) RepairerSerializeReferences (so far only from 2021.2) - an editor window that allows you to fix links that flew due to a change in the name of the class, namespace, or assembly: https://github.com/Paulsams/RepairerSerializeReferences
+1) RepairerSerializeReferences - an editor window that allows you to fix links that flew due to a change in the name of the class, namespace, or assembly: https://github.com/Paulsams/RepairerSerializeReferences
 
 ## Dependencies
 - Is using:
     + MicsUtilities: https://github.com/Paulsams/MiscUtilities.git
-
-# Known Issues
-1) When editing objects multiple times and pressing the `-` button on a sheet/array (and only if this is not an SR array, but they are nested through other classes), errors may appear. There are no ideas yet, since the messages don’t even have a stack trace, but otherwise multiple editing works correctly.
 
 ## Opportunities
 1) Works for lists/array and for any nesting of this attribute;
@@ -43,7 +40,8 @@ IMPORTANT: In order for the attribute to work for lists/array, it is necessary t
 ![image](Documentation~/Nullable.gif)
 
 3) ISerializeReferenceChangeValidate - an interface that you can implement at the heir in order to make some kind of check that the Type change is valid at the moment.
-4) When you click on `+` for lists, serialize references (nested through an additional class) are not copied (I have not yet seen this in any implementation of field attributes);
+4) A context menu with copying to the clipboard, as well as checking that the paste is valid. \
+![image](Documentation~/ContextMenu.png)
 5) Multiple object editing available.
 
 ## Constructors

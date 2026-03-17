@@ -41,7 +41,6 @@ namespace Paulsams.MicsUtils.ChoiceReference.Editor.Drawers
                 DrawerParameters drawerParameters)
             {
                 PropertyParameters parameters = GetParameters(property, drawerParameters);
-                ObjectState state = GetOrCreateObjectState(parameters.Property);
 
                 rect.height = EditorGUIUtility.singleLineHeight;
                 Rect rectLabel = rect;
@@ -55,9 +54,7 @@ namespace Paulsams.MicsUtils.ChoiceReference.Editor.Drawers
                 int indexInPopup = DrawPopupAndGetIndex(parameters, rect);
                 if (indexInPopup != parameters.IndexInPopup)
                 {
-                    RemoveObject(parameters);
-                    ChangeManagedReferenceValue(ref parameters, state, indexInPopup);
-                    AddObject(parameters);
+                    ChangeManagedReferenceValue(ref parameters, indexInPopup);
                 }
 
                 DrawProperty(parameters, label, rect);
