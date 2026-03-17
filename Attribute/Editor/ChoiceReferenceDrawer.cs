@@ -245,7 +245,7 @@ namespace Paulsams.MicsUtils.ChoiceReference.Editor.Drawers
             Action<PropertyDrawer> actionFromDrawer,
             Action<SerializedProperty> actionFromChildren)
         {
-            if (parameters.MayExpanded && parameters.Property.isExpanded)
+            if (parameters.MayExpanded)
             {
                 var drawerType = EditorGUIUtilityInternal.GetDrawerTypeForPropertyAndType(
                     parameters.Property,

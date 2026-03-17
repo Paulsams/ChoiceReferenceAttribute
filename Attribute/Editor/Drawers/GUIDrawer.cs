@@ -15,17 +15,20 @@ namespace Paulsams.MicsUtils.ChoiceReference.Editor.Drawers
                 PropertyParameters parameters = GetParameters(property, drawerParameters);
 
                 float height = EditorGUIUtility.singleLineHeight;
-                DrawFromPropertyDrawerOrLoopFromChildren(parameters,
-                    (drawer) =>
-                    {
-                        height += drawer.GetPropertyHeight(parameters.Property, label) +
-                                  EditorGUIUtility.standardVerticalSpacing;
-                    },
-                    (children) =>
-                    {
-                        height += EditorGUI.GetPropertyHeight(children, true) +
-                                  EditorGUIUtility.standardVerticalSpacing;
-                    });
+                if (parameters.Property.isExpanded)
+                {
+                    DrawFromPropertyDrawerOrLoopFromChildren(parameters,
+                        (drawer) =>
+                        {
+                            height += drawer.GetPropertyHeight(parameters.Property, label) +
+                                      EditorGUIUtility.standardVerticalSpacing;
+                        },
+                        (children) =>
+                        {
+                            height += EditorGUI.GetPropertyHeight(children, true) +
+                                      EditorGUIUtility.standardVerticalSpacing;
+                        });
+                }
 
                 return height;
             }
@@ -78,18 +81,21 @@ namespace Paulsams.MicsUtils.ChoiceReference.Editor.Drawers
                     Rect rectField = rect;
                     rectField.y += rect.height + EditorGUIUtility.standardVerticalSpacing;
 
-                    DrawFromPropertyDrawerOrLoopFromChildren(parameters,
-                        (drawer) =>
-                        {
-                            rect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
-                            drawer.OnGUI(rect, parameters.Property, label);
-                        },
-                        (children) =>
-                        {
-                            EditorGUI.PropertyField(rectField, children, true);
-                            rectField.y += EditorGUI.GetPropertyHeight(children, true) +
-                                           EditorGUIUtility.standardVerticalSpacing;
-                        });
+                    if (parameters.Property.isExpanded)
+                    {
+                        DrawFromPropertyDrawerOrLoopFromChildren(parameters,
+                            (drawer) =>
+                            {
+                                rect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
+                                drawer.OnGUI(rect, parameters.Property, label);
+                            },
+                            (children) =>
+                            {
+                                EditorGUI.PropertyField(rectField, children, true);
+                                rectField.y += EditorGUI.GetPropertyHeight(children, true) +
+                                               EditorGUIUtility.standardVerticalSpacing;
+                            });
+                    }
                 }
                 --EditorGUI.indentLevel;
             }

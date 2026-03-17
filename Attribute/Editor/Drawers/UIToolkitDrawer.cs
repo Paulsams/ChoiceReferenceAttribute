@@ -20,7 +20,6 @@ namespace Paulsams.MicsUtils.ChoiceReference.Editor.Drawers
                 Foldout foldout = new Foldout();
                 foldout.text = label;
                 foldout.BindProperty(property);
-                foldout.contentContainer.style.marginBottom = 1;
                 VisualElementsUtilities.SetAlignedLabelFromFoldout(foldout, out var containerOnSameRowWithToggle,
                     out VisualElement checkmark);
 
@@ -31,19 +30,13 @@ namespace Paulsams.MicsUtils.ChoiceReference.Editor.Drawers
 
                 UpdateCheckmark(parameters);
 
-                var containerProperties = new VisualElement();
-                foldout.Add(containerProperties);
                 var popup = CreateDropdown(
                     property,
-                    containerProperties,
+                    foldout.contentContainer,
                     () => drawerParameters,
                     label,
                     (_) => { },
-                    (currentParameters) =>
-                    {
-                        UpdateCheckmark(currentParameters);
-                        foldout.value = true;
-                    });
+                    UpdateCheckmark);
 
                 containerOnSameRowWithToggle.Add(popup);
 
@@ -78,9 +71,10 @@ namespace Paulsams.MicsUtils.ChoiceReference.Editor.Drawers
                         },
                         (children) =>
                         {
-                            PropertyField field = new PropertyField(children);
-                            field.BindProperty(children);
-                            containerProperties.Add(field);
+                            containerProperties.Add(new PropertyField(children)
+                            {
+                                bindingPath = children.name
+                            });
                         });
                 }
 
