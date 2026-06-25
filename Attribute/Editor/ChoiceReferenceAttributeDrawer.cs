@@ -1,3 +1,4 @@
+using System.Reflection;
 using Paulsams.MicsUtils.ChoiceReference.Editor.Drawers;
 using UnityEngine;
 using UnityEditor;
@@ -10,16 +11,17 @@ namespace Paulsams.MicsUtils.ChoiceReference.Editor
     {
         public override VisualElement CreatePropertyGUI(SerializedProperty property) =>
             ChoiceReferenceDrawer.UIToolkit.Create(property, property.displayName,
-                new DrawerParameters(fieldInfo, attribute as ChoiceReferenceAttribute));
+                new DrawerParameters(GetFieldInfo(property), attribute as ChoiceReferenceAttribute));
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label) =>
             ChoiceReferenceDrawer.OnGUI.GetPropertyHeight(property, label,
-                new DrawerParameters(fieldInfo, attribute as ChoiceReferenceAttribute));
+                new DrawerParameters(GetFieldInfo(property), attribute as ChoiceReferenceAttribute));
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) =>
             ChoiceReferenceDrawer.OnGUI.Draw(position, property, label,
-                new DrawerParameters(fieldInfo, attribute as ChoiceReferenceAttribute));
+                new DrawerParameters(GetFieldInfo(property), attribute as ChoiceReferenceAttribute));
 
-        public override bool CanCacheInspectorGUI(SerializedProperty property) => true;
+        // PropertyDrawer's FieldInfo is not working properly.
+        private FieldInfo GetFieldInfo(SerializedProperty property) => property.GetFieldInfoFromPropertyPath().field;
     }
 }

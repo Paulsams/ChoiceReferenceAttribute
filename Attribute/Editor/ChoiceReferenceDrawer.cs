@@ -30,10 +30,14 @@ namespace Paulsams.MicsUtils.ChoiceReference.Editor.Drawers
             for (var i = 1; i < otherProperty.serializedObject.targetObjects.Length; i++)
             {
                 var targetObject = otherProperty.serializedObject.targetObjects[i];
-                var otherNewValue = baseNewValue is null
-                    ? null
-                    : ReflectionUtilities.CreateObjectByDefaultConstructorOrUninitializedObject(baseNewValue.GetType());
-                EditorUtility.CopySerializedManagedFieldsOnly(baseNewValue, otherNewValue);
+                object otherNewValue = null;
+                if (baseNewValue != null)
+                {
+                    otherNewValue = ReflectionUtilities.CreateObjectByDefaultConstructorOrUninitializedObject(
+                        baseNewValue.GetType());
+                    EditorUtility.CopySerializedManagedFieldsOnly(baseNewValue, otherNewValue);
+                }
+
                 ApplyBySerializedObject(targetObject, otherNewValue);
             }
 

@@ -29,9 +29,9 @@ namespace Paulsams.MicsUtils.ChoiceReference.Editor.Parameters
         }
 
         private static int GetIndexInPopupFromValue(ReferenceData data, object managedReferenceValue) =>
-            managedReferenceValue == null
+            managedReferenceValue == null ||
+            data.TypeToIndexInPopup.TryGetValue(managedReferenceValue.GetType(), out var index) == false
                 ? data.IndexNullVariable
-                : data.TypeToIndexInPopup[managedReferenceValue.GetType()]
-                  + (data.DrawParameters.Nullable ? 1 : 0);
+                : index + (data.DrawParameters.Nullable ? 1 : 0);
     }
 }

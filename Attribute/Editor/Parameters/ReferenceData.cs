@@ -21,8 +21,11 @@ namespace Paulsams.MicsUtils.ChoiceReference.Editor.Parameters
         public ReferenceData(Type fieldType, IChoiceReferenceParameters drawParameters)
         {
             Type typeProperty = ReflectionUtilities.GetArrayOrListElementTypeOrThisType(fieldType);
-            Types = Array.AsReadOnly(TypeCache.GetTypesDerivedFrom(typeProperty)
-                .Where(type => type.IsAbstract == false && type.IsInterface == false).ToArray());
+            var types = TypeCache.GetTypesDerivedFrom(typeProperty)
+                .Where(type => type.IsAbstract == false && type.IsInterface == false);
+            if (typeProperty.IsAbstract == false)
+                types = types.Append(typeProperty);
+            Types = Array.AsReadOnly(types.ToArray());
             TypeToIndexInPopup = new ReadOnlyDictionary<Type, int>(
                 Types
                     .Select((type, i) => (type, i))

@@ -110,10 +110,13 @@ namespace Paulsams.MicsUtils.ChoiceReference.Editor
             var property = (SerializedProperty)customData;
 
             var oldValue = property.managedReferenceValue;
-            var newValue = oldValue is null
-                ? null
-                : ReflectionUtilities.CreateObjectByDefaultConstructorOrUninitializedObject(oldValue.GetType());
-            EditorUtility.CopySerializedManagedFieldsOnly(oldValue, newValue);
+            object newValue = null;
+            if (oldValue != null)
+            {
+                newValue = ReflectionUtilities.CreateObjectByDefaultConstructorOrUninitializedObject(
+                    oldValue.GetType());
+                EditorUtility.CopySerializedManagedFieldsOnly(oldValue, newValue);
+            }
             property.managedReferenceValue = newValue;
             property.serializedObject.ApplyModifiedProperties();
         }

@@ -54,7 +54,7 @@ namespace Paulsams.MicsUtils.ChoiceReference.Editor.Drawers
                 void DrawChildren(PropertyParameters currentParameters)
                 {
                     DrawFromPropertyDrawerOrLoopFromChildren(currentParameters,
-                        (drawer) =>
+                        drawer =>
                         {
                             var container = drawer.CreatePropertyGUI(currentParameters.Property);
                             if (container == null)
@@ -69,12 +69,11 @@ namespace Paulsams.MicsUtils.ChoiceReference.Editor.Drawers
 
                             containerProperties.Add(container);
                         },
-                        (children) =>
+                        children =>
                         {
-                            containerProperties.Add(new PropertyField(children)
-                            {
-                                bindingPath = children.name
-                            });
+                            var field = new PropertyField();
+                            field.BindProperty(children);
+                            containerProperties.Add(field);
                         });
                 }
 
