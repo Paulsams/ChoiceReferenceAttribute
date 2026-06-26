@@ -34,7 +34,7 @@ namespace Paulsams.MicsUtils.ChoiceReference.Editor
         }
 
         private static readonly GUIContent _pasteContent = new GUIContent("Paste");
-        private static readonly GUIContent _newInstanceContent = new GUIContent("New Instance");
+        private static readonly GUIContent _newInstanceAndCopyContent = new GUIContent("New Instance and Copy");
         private static readonly GUIContent _resetAndNewInstanceContent = new GUIContent("Reset and New Instance");
 
         [InitializeOnLoadMethod]
@@ -78,12 +78,12 @@ namespace Paulsams.MicsUtils.ChoiceReference.Editor
 
             if (property.managedReferenceValue != null)
             {
-                menu.AddItem(_newInstanceContent, false, NewInstance, property);
+                menu.AddItem(_newInstanceAndCopyContent, false, NewInstanceAndCopy, property);
                 menu.AddItem(_resetAndNewInstanceContent, false, ResetAndNewInstance, property);
             }
             else
             {
-                menu.AddDisabledItem(_newInstanceContent);
+                menu.AddDisabledItem(_newInstanceAndCopyContent);
                 menu.AddDisabledItem(_resetAndNewInstanceContent);
             }
         }
@@ -105,7 +105,7 @@ namespace Paulsams.MicsUtils.ChoiceReference.Editor
             property.serializedObject.ApplyModifiedProperties();
         }
 
-        private static void NewInstance(object customData)
+        private static void NewInstanceAndCopy(object customData)
         {
             var property = (SerializedProperty)customData;
 

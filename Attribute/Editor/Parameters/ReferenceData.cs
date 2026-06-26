@@ -15,28 +15,38 @@ namespace Paulsams.MicsUtils.ChoiceReference.Editor.Parameters
         public readonly ReadOnlyCollection<Type> Types;
         public readonly ReadOnlyDictionary<Type, int> TypeToIndexInPopup;
 
-        public readonly IChoiceReferenceParameters DrawParameters;
+        public readonly ChoiceReferenceParameters DrawParameters;
         public readonly int IndexNullVariable;
 
-        public ReferenceData(Type fieldType, IChoiceReferenceParameters drawParameters)
+        public ReferenceData(Type typeProperty, ChoiceReferenceParameters drawParameters,
+            Func<IEnumerable<Type>, IEnumerable<(Type, string)>> filter = null)
         {
-            Type typeProperty = ReflectionUtilities.GetArrayOrListElementTypeOrThisType(fieldType);
-            var types = TypeCache.GetTypesDerivedFrom(typeProperty)
-                .Where(type => type.IsAbstract == false && type.IsInterface == false);
-            if (typeProperty.IsAbstract == false)
-                types = types.Append(typeProperty);
-            Types = Array.AsReadOnly(types.ToArray());
-            TypeToIndexInPopup = new ReadOnlyDictionary<Type, int>(
-                Types
-                    .Select((type, i) => (type, i))
-                    .ToDictionary(tuple => tuple.type, tuple => tuple.i)
-            );
-            List<string> typesNames = Types.Select(type => type.Name).ToList();
+            var derivedTypes = TypeCache.GetTypesDerivedFrom(typeProperty)
+                .Append(typeProperty)
+                .Where(type => type.IsAbstract == false);
+            IEnumerable<(Type type, string name)> typesWithNames;
+            if (filter != null)
+                typesWithNames = filter(derivedTypes);
+            else
+                typesWithNames = derivedTypes.Select(type => (type, type.Name));
 
-            if (drawParameters.Nullable)
-                typesNames.Insert(0, _nullableNameInPopup);
-
-            TypesNames = typesNames.ToArray();
+            var materializedTypesWithNames = typesWithNames.ToList();
+            var types = new Type[materializedTypesWithNames.Count];
+            var typeToIndexInPopup = new Dictionary<Type, int>(materializedTypesWithNames.Count);
+            var offsetIndexForNames = drawParameters.Nullable ? 1 : 0;
+            var typesNames = new string[materializedTypesWithNames.Count + offsetIndexForNames];
+            if (offsetIndexForNames != 0)
+                typesNames[0] = _nullableNameInPopup;
+            for (var i = 0; i < materializedTypesWithNames.Count; i++)
+            {
+                var (type, name) = materializedTypesWithNames[i];
+                types[i] = type;
+                typeToIndexInPopup.Add(type, i);
+                typesNames[i + offsetIndexForNames] = name;
+            }
+            Types = Array.AsReadOnly(types);
+            TypeToIndexInPopup = new ReadOnlyDictionary<Type, int>(typeToIndexInPopup);
+            TypesNames = typesNames;
 
             DrawParameters = drawParameters;
             IndexNullVariable = drawParameters.Nullable ? 0 : -1;

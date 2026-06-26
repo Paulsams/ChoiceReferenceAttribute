@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using Paulsams.MicsUtils.ChoiceReference.Editor.Parameters;
 using UnityEditor;
 using UnityEngine;
@@ -10,8 +9,8 @@ namespace Paulsams.MicsUtils.ChoiceReference.Editor.Drawers
 {
     public static partial class ChoiceReferenceDrawer
     {
-        private static readonly Dictionary<FieldInfo, ReferenceData> _dataReferences =
-            new Dictionary<FieldInfo, ReferenceData>();
+        private static readonly Dictionary<(Type, ChoiceReferenceParameters), ReferenceData> _dataReferences =
+            new Dictionary<(Type, ChoiceReferenceParameters), ReferenceData>();
 
         private static void SetValueAndSaveProperty(SerializedProperty otherProperty, object baseNewValue)
         {
@@ -139,12 +138,11 @@ namespace Paulsams.MicsUtils.ChoiceReference.Editor.Drawers
 
         private static ReferenceData GetOrCreateDataReference(DrawerParameters drawerParameters)
         {
-            if (_dataReferences.TryGetValue(drawerParameters.FieldInfo, out ReferenceData data) == false)
-            {
-                data = new ReferenceData(drawerParameters.FieldInfo.FieldType, drawerParameters.DrawParameters);
-                _dataReferences.Add(drawerParameters.FieldInfo, data);
-            }
-
+            var key = (drawerParameters.FieldType, drawerParameters.Parameters);
+            if (_dataReferences.TryGetValue(key, out var data))
+                return data;
+            data = new ReferenceData(key.FieldType, key.Parameters);
+            _dataReferences.Add(key, data);
             return data;
         }
     }

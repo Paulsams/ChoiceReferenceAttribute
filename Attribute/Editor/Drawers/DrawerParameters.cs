@@ -1,23 +1,22 @@
-﻿using System.Reflection;
+﻿using System;
 using UnityEditor;
 
 namespace Paulsams.MicsUtils.ChoiceReference.Editor.Drawers
 {
     public struct DrawerParameters
     {
-        public readonly FieldInfo FieldInfo;
-        public readonly IChoiceReferenceParameters DrawParameters;
+        public readonly Type FieldType;
+        public readonly ChoiceReferenceParameters Parameters;
 
-        public DrawerParameters(FieldInfo fieldInfo, IChoiceReferenceParameters drawParameters)
+        public DrawerParameters(Type fieldType, ChoiceReferenceParameters parameters)
         {
-            FieldInfo = fieldInfo;
-            DrawParameters = drawParameters;
+            FieldType = ReflectionUtilities.GetArrayOrListElementTypeOrThisType(fieldType);
+            Parameters = parameters;
         }
 
-        public DrawerParameters(SerializedProperty property, IChoiceReferenceParameters drawParameters)
+        public DrawerParameters(SerializedProperty property, ChoiceReferenceParameters parameters)
+            : this(property.GetManagedReferenceFieldType(), parameters)
         {
-            FieldInfo = property.GetFieldInfoFromPropertyPath().field;
-            DrawParameters = drawParameters;
         }
     }
 }

@@ -35,8 +35,7 @@ namespace Paulsams.MicsUtils.ChoiceReference.Editor.Drawers
                     foldout.contentContainer,
                     () => drawerParameters,
                     label,
-                    (_) => { },
-                    UpdateCheckmark);
+                    valueAfterChangeCallback: UpdateCheckmark);
 
                 containerOnSameRowWithToggle.Add(popup);
 
@@ -53,6 +52,7 @@ namespace Paulsams.MicsUtils.ChoiceReference.Editor.Drawers
             {
                 void DrawChildren(PropertyParameters currentParameters)
                 {
+                    containerProperties.Clear();
                     DrawFromPropertyDrawerOrLoopFromChildren(currentParameters,
                         drawer =>
                         {
@@ -77,12 +77,23 @@ namespace Paulsams.MicsUtils.ChoiceReference.Editor.Drawers
                         });
                 }
 
-                PropertyParameters parameters = GetParameters(property, getterDrawerParameters());
+                return CreateDropdown(DrawChildren,
+                    () => GetParameters(property, getterDrawerParameters()),
+                    valueBeforeChangeCallback, valueAfterChangeCallback);
+            }
+
+            public static DropdownField CreateDropdown(
+                Action<PropertyParameters> redrawChildren,
+                Func<PropertyParameters> getterPropertyParameters,
+                Action<PropertyParameters> valueBeforeChangeCallback = null,
+                Action<PropertyParameters> valueAfterChangeCallback = null)
+            {
+                var parameters = getterPropertyParameters();
 
                 var popup = new DropdownField(parameters.Data.TypesNames.ToList(), parameters.IndexInPopup);
-                popup.RegisterValueChangedCallback((_) =>
+                popup.RegisterValueChangedCallback(_ =>
                 {
-                    PropertyParameters currentParameters = GetParameters(property, getterDrawerParameters());
+                    var currentParameters = getterPropertyParameters();
                     if (popup.index == currentParameters.IndexInPopup)
                         return;
 
@@ -94,12 +105,11 @@ namespace Paulsams.MicsUtils.ChoiceReference.Editor.Drawers
                         return;
                     }
 
-                    containerProperties.Clear();
-                    DrawChildren(currentParameters);
+                    redrawChildren(currentParameters);
                     valueAfterChangeCallback?.Invoke(currentParameters);
                 });
                 popup.style.flexGrow = 1;
-                DrawChildren(parameters);
+                redrawChildren(parameters);
 
                 return popup;
             }

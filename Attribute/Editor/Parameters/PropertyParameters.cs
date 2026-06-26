@@ -28,7 +28,7 @@ namespace Paulsams.MicsUtils.ChoiceReference.Editor.Parameters
             MayExpanded = IndexInPopup != Data.IndexNullVariable;
         }
 
-        private static int GetIndexInPopupFromValue(ReferenceData data, object managedReferenceValue) =>
+        public static int GetIndexInPopupFromValue(ReferenceData data, object managedReferenceValue) =>
             managedReferenceValue == null ||
             data.TypeToIndexInPopup.TryGetValue(managedReferenceValue.GetType(), out var index) == false
                 ? data.IndexNullVariable
